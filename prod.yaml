@@ -1,0 +1,194 @@
+version: "2.4"
+
+services:
+  odoo:
+    extends:
+      file: common.yaml
+      service: odoo
+    restart: unless-stopped
+    hostname: "manmanufacturing.com"
+    env_file:
+      - .docker/odoo.env
+      - .docker/db-access.env
+    environment:
+      DB_FILTER: "^prod"
+      DOODBA_ENVIRONMENT: "${DOODBA_ENVIRONMENT-prod}"
+      INITIAL_LANG: "en_US"
+      LIST_DB: "false"
+      ODOO_BUS_PUBLIC_SAMESITE_WS: 1
+      SMTP_SERVER: smtplocal
+      PGHOST: man18-18-0-prod-db
+    depends_on:
+      - db
+      - smtp
+    networks:
+      default:
+      inverseproxy_shared:
+    labels:
+      doodba.domain.main: "manmanufacturing.com"
+      traefik.enable: "true"
+      traefik.domain: "manmanufacturing.com"
+      traefik.forbiddenCrawlers-0.frontend.headers.customResponseHeaders:
+        "X-Robots-Tag:noindex, nofollow"
+      traefik.forbiddenCrawlers-0.frontend.rule: Host(`manmanufacturing.com`);Path:/web,/web/{anything:.*},/website/info,/website/info/{anything:.*}
+      traefik.main-0.frontend.rule: Host(`manmanufacturing.com`)
+      traefik.longpolling-0.frontend.rule: Host(`manmanufacturing.com`);Path:/websocket,/websocket/{anything:.*}
+      traefik.longpolling-0.port: 8072
+      traefik.alt-1.frontend.redirect.regex: ^(.*)://([^/]+)/(.*)$$
+      traefik.alt-1.frontend.redirect.replacement: $$1://manmanufacturing.com/$$3
+      traefik.alt-1.frontend.rule: Host(`www.manmanufacturing.com`)
+      traefik.http.middlewares.man18-18-0-prod-buffering.buffering.retryExpression:
+        IsNetworkError() && Attempts() < 5
+      traefik.http.middlewares.man18-18-0-prod-compress.compress: "true"
+      ? traefik.http.middlewares.man18-18-0-prod-forbid-crawlers.headers.customResponseHeaders.X-Robots-Tag
+      : "noindex, nofollow"
+      traefik.http.middlewares.man18-18-0-prod-addSTS.headers.forceSTSHeader: "true"
+      traefik.http.middlewares.man18-18-0-prod-forceSecure.redirectScheme.scheme: https
+      traefik.http.middlewares.man18-18-0-prod-forceSecure.redirectScheme.permanent: "true"
+      traefik.http.middlewares.man18-18-0-prod-override-ws-headers.headers.customRequestHeaders.X-Forwarded-Proto: "https"
+      traefik.http.services.man18-18-0-prod-main.loadbalancer.server.port: 8069
+      traefik.http.services.man18-18-0-prod-longpolling.loadbalancer.server.port: 8072
+      traefik.http.routers.man18-18-0-prod-main-0.rule:
+        Host(`manmanufacturing.com`)
+      traefik.http.routers.man18-18-0-prod-main-0.service:
+        man18-18-0-prod-main
+      traefik.http.routers.man18-18-0-prod-main-0.middlewares:
+        man18-18-0-prod-addSTS, man18-18-0-prod-buffering, man18-18-0-prod-compress, man18-18-0-prod-forceSecure
+      traefik.http.routers.man18-18-0-prod-main-0.priority: 1
+      traefik.http.routers.man18-18-0-prod-main-secure-0.rule:
+        Host(`manmanufacturing.com`)
+      traefik.http.routers.man18-18-0-prod-main-secure-0.service:
+        man18-18-0-prod-main
+      traefik.http.routers.man18-18-0-prod-main-secure-0.middlewares:
+        man18-18-0-prod-addSTS, man18-18-0-prod-buffering, man18-18-0-prod-compress, man18-18-0-prod-forceSecure
+      traefik.http.routers.man18-18-0-prod-main-secure-0.priority: 1
+      traefik.http.routers.man18-18-0-prod-main-secure-0.tls: "true"
+      traefik.http.routers.man18-18-0-prod-main-secure-0.tls.certResolver:
+        letsencrypt
+      traefik.http.routers.man18-18-0-prod-longpolling-0.rule:
+        Host(`manmanufacturing.com`) && Path(`/websocket`)
+      traefik.http.routers.man18-18-0-prod-longpolling-0.service:
+        man18-18-0-prod-longpolling
+      traefik.http.routers.man18-18-0-prod-longpolling-0.middlewares:
+        man18-18-0-prod-addSTS, man18-18-0-prod-forceSecure, man18-18-0-prod-override-ws-headers
+      traefik.http.routers.man18-18-0-prod-longpolling-0.priority: 10
+      traefik.http.routers.man18-18-0-prod-longpolling-secure-0.rule:
+        Host(`manmanufacturing.com`) && Path(`/websocket`)
+      traefik.http.routers.man18-18-0-prod-longpolling-secure-0.service:
+        man18-18-0-prod-longpolling
+      traefik.http.routers.man18-18-0-prod-longpolling-secure-0.middlewares:
+        man18-18-0-prod-addSTS, man18-18-0-prod-forceSecure, man18-18-0-prod-override-ws-headers
+      traefik.http.routers.man18-18-0-prod-longpolling-secure-0.priority: 10
+      traefik.http.routers.man18-18-0-prod-longpolling-secure-0.tls: "true"
+      traefik.http.routers.man18-18-0-prod-longpolling-secure-0.tls.certResolver:
+        letsencrypt
+      traefik.http.routers.man18-18-0-prod-forbiddenCrawlers-0.rule:
+        Host(`manmanufacturing.com`) && (PathPrefix(`/web/`, `/website/info/`) || Path(`/web`, `/website/info`))
+      traefik.http.routers.man18-18-0-prod-forbiddenCrawlers-0.service:
+        man18-18-0-prod-main
+      traefik.http.routers.man18-18-0-prod-forbiddenCrawlers-0.middlewares:
+        man18-18-0-prod-addSTS, man18-18-0-prod-buffering, man18-18-0-prod-compress, man18-18-0-prod-forbid-crawlers, man18-18-0-prod-forceSecure
+      traefik.http.routers.man18-18-0-prod-forbiddenCrawlers-0.priority: 10
+      traefik.http.routers.man18-18-0-prod-forbiddenCrawlers-secure-0.rule:
+        Host(`manmanufacturing.com`) && (PathPrefix(`/web/`, `/website/info/`) || Path(`/web`, `/website/info`))
+      traefik.http.routers.man18-18-0-prod-forbiddenCrawlers-secure-0.service:
+        man18-18-0-prod-main
+      traefik.http.routers.man18-18-0-prod-forbiddenCrawlers-secure-0.middlewares:
+        man18-18-0-prod-addSTS, man18-18-0-prod-buffering, man18-18-0-prod-compress, man18-18-0-prod-forbid-crawlers, man18-18-0-prod-forceSecure
+      traefik.http.routers.man18-18-0-prod-forbiddenCrawlers-secure-0.priority: 10
+      traefik.http.routers.man18-18-0-prod-forbiddenCrawlers-secure-0.tls: "true"
+      traefik.http.routers.man18-18-0-prod-forbiddenCrawlers-secure-0.tls.certResolver:
+        letsencrypt
+      traefik.http.routers.man18-18-0-prod-allowedCrawlers-0.rule:
+        Host(`manmanufacturing.com`) && (PathPrefix(`/web/image/website/`) || Path(`/web/image/website`))
+      traefik.http.routers.man18-18-0-prod-allowedCrawlers-0.service:
+        man18-18-0-prod-main
+      traefik.http.routers.man18-18-0-prod-allowedCrawlers-0.middlewares:
+        man18-18-0-prod-addSTS, man18-18-0-prod-buffering, man18-18-0-prod-compress, man18-18-0-prod-forceSecure
+      traefik.http.routers.man18-18-0-prod-allowedCrawlers-0.priority: 100
+      traefik.http.routers.man18-18-0-prod-allowedCrawlers-secure-0.rule:
+        Host(`manmanufacturing.com`) && (PathPrefix(`/web/image/website/`) || Path(`/web/image/website`))
+      traefik.http.routers.man18-18-0-prod-allowedCrawlers-secure-0.service:
+        man18-18-0-prod-main
+      traefik.http.routers.man18-18-0-prod-allowedCrawlers-secure-0.middlewares:
+        man18-18-0-prod-addSTS, man18-18-0-prod-buffering, man18-18-0-prod-compress, man18-18-0-prod-forceSecure
+      traefik.http.routers.man18-18-0-prod-allowedCrawlers-secure-0.priority: 100
+      traefik.http.routers.man18-18-0-prod-allowedCrawlers-secure-0.tls: "true"
+      traefik.http.routers.man18-18-0-prod-allowedCrawlers-secure-0.tls.certResolver:
+        letsencrypt
+      traefik.http.middlewares.man18-18-0-prod-redirect-1.redirectRegex.permanent: "true"
+      traefik.http.middlewares.man18-18-0-prod-redirect-1.redirectRegex.regex: ^(.*)://([^/]+)/(.*)$$
+      traefik.http.middlewares.man18-18-0-prod-redirect-1.redirectRegex.replacement: $$1://manmanufacturing.com/$$3
+      traefik.http.routers.man18-18-0-prod-redirect-1.rule:
+        Host(`www.manmanufacturing.com`)
+      traefik.http.routers.man18-18-0-prod-redirect-1.service:
+        man18-18-0-prod-main
+      traefik.http.routers.man18-18-0-prod-redirect-1.middlewares:
+        man18-18-0-prod-addSTS, man18-18-0-prod-compress, man18-18-0-prod-forceSecure, man18-18-0-prod-redirect-1
+      traefik.http.routers.man18-18-0-prod-redirect-1.priority: 10
+      traefik.http.routers.man18-18-0-prod-redirect-secure-1.rule:
+        Host(`www.manmanufacturing.com`)
+      traefik.http.routers.man18-18-0-prod-redirect-secure-1.service:
+        man18-18-0-prod-main
+      traefik.http.routers.man18-18-0-prod-redirect-secure-1.middlewares:
+        man18-18-0-prod-addSTS, man18-18-0-prod-compress, man18-18-0-prod-forceSecure, man18-18-0-prod-redirect-1
+      traefik.http.routers.man18-18-0-prod-redirect-secure-1.priority: 10
+      traefik.http.routers.man18-18-0-prod-redirect-secure-1.tls: "true"
+      traefik.http.routers.man18-18-0-prod-redirect-secure-1.tls.certResolver:
+        letsencrypt
+
+  db:
+    extends:
+      file: common.yaml
+      service: db
+    environment:
+      DB_HOST: man18-18-0-prod-db
+    env_file:
+      - .docker/db-creation.env
+    restart: unless-stopped
+    networks:
+      default:
+        aliases:
+          - "man18-18-0-prod-db"
+
+  smtp:
+    extends:
+      file: common.yaml
+      service: smtpreal
+    env_file:
+      - .docker/smtp.env
+    networks:
+      default:
+        aliases:
+          - smtplocal
+    restart: unless-stopped
+
+  backup:
+    extends:
+      file: common.yaml
+      service: backup
+    env_file:
+      - .docker/backup.env
+      - .docker/db-access.env
+    restart: unless-stopped
+    depends_on:
+      - db
+      - smtp
+
+networks:
+  default:
+    driver_opts:
+      encrypted: 1
+
+  inverseproxy_shared:
+    external: true
+
+volumes:
+  backup_cache:
+  filestore:
+  db:
+  mailconfig:
+  maildata:
+  maillogs:
+  maillogssupervisord:
+  mailstate:
