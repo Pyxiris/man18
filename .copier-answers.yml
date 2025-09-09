@@ -1,0 +1,52 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: v8.4.2
+_src_path: gh:Tecnativa/doodba-copier-template
+backup_deletion: false
+backup_dst: boto3+s3://man18-backup
+backup_email_from: backups@manmanufacturing.com
+backup_email_to: admin@manmanufacturing.com
+backup_image_version: latest
+backup_tz: America/Detroit
+cidr_whitelist: null
+domains_prod:
+  - hosts:
+      - manmanufacturing.com
+  - hosts:
+      - www.manmanufacturing.com
+    redirect_permanent: true
+    redirect_to: manmanufacturing.com
+domains_test:
+  - hosts:
+      - test.manmanufacturing.com
+  - hosts:
+      - www.test.manmanufacturing.com
+    redirect_permanent: true
+    redirect_to: test.manmanufacturing.com
+gitlab_url: ""
+odoo_dbfilter: ^prod
+odoo_initial_lang: en_US
+odoo_listdb: false
+odoo_listdb_staging: true
+odoo_oci_image: ghcr.io/Pyxiris/man18
+odoo_proxy: traefik
+odoo_version: 18.0
+paths_with_crawlers:
+  - /web/image/website
+paths_without_crawlers:
+  - /web
+  - /website/info
+postgres_dbname: prod
+postgres_exposed: false
+postgres_username: odoo
+postgres_version: "16"
+project_author: Liam Noonan
+project_license: LGPL-3.0-or-later
+project_name: man18
+smtp_canonical_default: manmanufacturing.com
+smtp_canonical_domains: []
+smtp_default_from: notifications@manmanufacturing.com
+smtp_relay_host: smtp-relay.brevo.com
+smtp_relay_port: 587
+smtp_relay_user: 95fbdc001@smtp-brevo.com
+smtp_relay_version: latest
+traefik_version: 2
