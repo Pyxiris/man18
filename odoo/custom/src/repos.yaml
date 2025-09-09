@@ -1,0 +1,13 @@
+# See https://github.com/Tecnativa/doodba#optodoocustomsrcreposyaml
+./odoo:
+  defaults:
+    # Shallow repositories ($DEPTH_DEFAULT=1) are faster & thinner
+    # You may need a bigger depth when merging PRs (use $DEPTH_MERGE
+    # for a sane value of 100 commits)
+    depth: 300
+  remotes:
+    odoo: https://github.com/odoo/odoo.git
+  target: agg
+  merges:
+    - odoo $ODOO_VERSION
+    - odoo refs/pull/241583/head # Backport improvements to the odoo-mailgate script in 19.0 to 18.0
