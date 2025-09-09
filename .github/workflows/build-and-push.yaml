@@ -1,0 +1,169 @@
+name: Build and Push Docker Image
+permissions: {}
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  repository_dispatch:
+    types: [build-push-command]
+
+jobs:
+  upload_client_payload:
+    name: Upload client_payload
+    runs-on: ubuntu-latest
+    if: github.event_name == 'repository_dispatch'
+    steps:
+      - name: Save client_payload
+        run: printf '%s' '${{ toJSON(github.event.client_payload) }}' > client_payload.json
+
+      - name: Upload client_payload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: client-payload
+          path: client_payload.json
+          retention-days: 1
+
+  _isCheck_build-and-push:
+    name: Build and push Odoo image
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'push' ||
+      github.event_name == 'repository_dispatch' &&
+      github.event.client_payload.slash_command.args.named.sha != '' &&
+      startsWith(
+        github.event.client_payload.pull_request.head.sha,
+        github.event.client_payload.slash_command.args.named.sha
+      )
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      tag: ${{ steps.meta.outputs.tags }}
+      job_id: ${{ job.check_run_id }}
+    steps:
+      - name: Log job run id
+        run: echo "Job run id is ${{ job.check_run_id }}"
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Read config from .copier-answers.yml
+        id: config
+        run: |
+          echo "odoo_version=$(yq '.odoo_version' .copier-answers.yml)" >> $GITHUB_OUTPUT
+          echo "db_version=$(yq '.postgres_version' .copier-answers.yml)" >> $GITHUB_OUTPUT
+          echo "odoo_oci_image=$(yq '.odoo_oci_image' .copier-answers.yml)" >> $GITHUB_OUTPUT
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ steps.config.outputs.odoo_oci_image }}
+          tags: |
+            # For git tag events (e.g. v1.2.3), create tags for:
+            # - the odoo version (e.g. '18.0')
+            # - the odoo version prefixed to the git tag (e.g. '18.0-v1.2.3')
+            type=raw,value=${{ steps.config.outputs.odoo_version }},enable=${{ startsWith(github.ref, 'refs/tags/') }}
+            type=raw,value=${{ steps.config.outputs.odoo_version }}-${{ github.ref_name }},enable=${{ startsWith(github.ref, 'refs/tags/') }}
+
+            # For pull requests, create a single tag with the odoo version and PR number (e.g. '18.0-pr123')
+            type=raw,value=${{ steps.config.outputs.odoo_version }}-pr${{ github.event.client_payload.pull_request.number }},enable=${{ github.event_name == 'repository_dispatch' }}
+
+      - name: Build and push Odoo image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./odoo
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            ODOO_VERSION=${{ steps.config.outputs.odoo_version }}
+            DB_VERSION=${{ steps.config.outputs.db_version }}
+            AGGREGATE=true
+            CLEAN=true
+            COMPILE=true
+            PIP_INSTALL_ODOO=true
+
+  comment-on-success:
+    name: Update comment on build success
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    needs: _isCheck_build-and-push
+    if: |
+      github.event_name == 'repository_dispatch' &&
+      needs._isCheck_build-and-push.result == 'success'
+    steps:
+      - name: Update comment
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          repository: ${{ github.event.client_payload.github.payload.repository.full_name }}
+          comment-id: ${{ github.event.client_payload.github.payload.comment.id }}
+          edit-mode: append
+          append-separator: newline
+          token: ${{ secrets.GITHUB_TOKEN }}
+          body: |
+
+            ***
+
+            Build result:
+            The image has been built and pushed as:
+            ```
+            ${{ needs._isCheck_build-and-push.outputs.tag }}
+            ```
+
+  comment-on-fail:
+    name: Comment on build fail
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    needs:
+      - _isCheck_build-and-push
+
+    if: |
+      always() &&
+      github.event_name == 'repository_dispatch' &&
+      needs._isCheck_build-and-push.result == 'failure'
+    steps:
+      - name: Build job run URL
+        id: build-job-url
+        run: |
+          base="${{ github.server_url }}"
+          repo="${{ github.repository }}"
+          run="${{ github.run_id }}"
+          job="${{ needs._isCheck_build-and-push.outputs.job_id }}"
+          echo "run_url=${base}/${repo}/actions/runs/${run}/job/${job}" >> "$GITHUB_OUTPUT"
+
+      - name: Update comment on build fail
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          repository: ${{ github.event.client_payload.github.payload.repository.full_name }}
+          comment-id: ${{ github.event.client_payload.github.payload.comment.id }}
+          edit-mode: append
+          append-separator: newline
+          token: ${{ secrets.GITHUB_TOKEN }}
+          body: |
+
+            ***
+            Build result:
+            The image build or push has **failed**.
+            [Click to see logs for details.](${{ steps.build-job-url.outputs.run_url }})
