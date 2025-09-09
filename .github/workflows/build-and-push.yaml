@@ -1,0 +1,68 @@
+name: Build and Push Docker Image
+
+on:
+  workflow_call:
+
+jobs:
+  build-and-push:
+    name: Build and push Odoo image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Read config from .copier-answers.yml
+        id: config
+        run: |
+          echo "odoo_version=$(yq '.odoo_version' .copier-answers.yml)" >> $GITHUB_OUTPUT
+          echo "db_version=$(yq '.postgres_version' .copier-answers.yml)" >> $GITHUB_OUTPUT
+          echo "odoo_oci_image=$(yq '.odoo_oci_image' .copier-answers.yml)" >> $GITHUB_OUTPUT
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ steps.config.outputs.odoo_oci_image }}
+          tags: |
+            # For git tag events (e.g. v1.2.3), create tags for:
+            # - the odoo version (e.g. '18.0')
+            # - the odoo version prefixed to the git tag (e.g. '18.0-v1.2.3')
+            type=raw,value=${{ steps.config.outputs.odoo_version }},enable=${{ startsWith(github.ref, 'refs/tags/') }}
+            type=raw,value=${{ steps.config.outputs.odoo_version }}-${{ github.ref_name }},enable=${{ startsWith(github.ref, 'refs/tags/') }}
+
+            # For pull requests, create a single tag with the odoo version and PR number (e.g. '18.0-pr123')
+            type=raw,value=${{ steps.config.outputs.odoo_version }}-pr${{ github.event.pull_request.number }},enable=${{ github.event_name == 'pull_request' }}
+
+      - name: Build and push Odoo image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./odoo
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            ODOO_VERSION=${{ steps.config.outputs.odoo_version }}
+            DB_VERSION=${{ steps.config.outputs.db_version }}
+            AGGREGATE=true
+            CLEAN=true
+            COMPILE=true
+            PIP_INSTALL_ODOO=true

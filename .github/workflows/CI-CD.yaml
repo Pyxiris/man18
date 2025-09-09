@@ -1,0 +1,37 @@
+name: CI/CD Pipeline
+
+on:
+  pull_request:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+
+jobs:
+  # First, run the pre-commit checks by calling the pre-commit workflow
+  run-pre-commit:
+    name: Run Pre-Commit Checks
+    uses: ./.github/workflows/pre-commit.yaml
+    secrets: inherit
+
+  # This job acts as a manual gate.
+  wait-for-approval:
+    name: Wait for Approval
+    runs-on: ubuntu-latest
+    needs: run-pre-commit
+    # If copying this workflow to another repo, keep in mind that
+    # environments need to be set up manually in the new repo.
+    environment: prod
+    steps:
+      - name: Approval received
+        run: echo "Approved by @${{ github.actor }}. Continuing with build and push."
+
+  # After pre-commit succeeds, run the build and push
+  run-build-and-push:
+    name: Run Build and Push
+    needs: wait-for-approval
+    uses: ./.github/workflows/build-and-push.yaml
+    permissions:
+      contents: read
+      packages: write
+    secrets: inherit
