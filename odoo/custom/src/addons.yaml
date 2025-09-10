@@ -1,0 +1,12 @@
+web:
+  - web_responsive
+  - web_refresher
+  - web_theme_classic
+  - web_copy_confirm
+  - web_favicon
+  - web_pivot_computed_measure
+  - web_remember_tree_column_width
+  - web_timeline
+  - web_tree_many2one_clickable
+  - web_widget_domain_editor_dialog
+  - web_widget_open_tab
