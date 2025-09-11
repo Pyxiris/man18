@@ -10,6 +10,9 @@ jobs:
     permissions:
       contents: read
       packages: write
+    outputs:
+      tags: ${{ steps.meta.outputs.tags }}
+      odoo_version: ${{ steps.config.outputs.odoo_version }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -66,3 +69,32 @@ jobs:
             CLEAN=true
             COMPILE=true
             PIP_INSTALL_ODOO=true
+
+  post-pr-comment:
+    name: Post PR Comment
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: github.event_name == 'pull_request'
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Post link to package in PR
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const odoo_version = `${{ needs.build-and-push.outputs.odoo_version }}`;
+            const tags = `${{ needs.build-and-push.outputs.tags }}`.split('\n');
+            const prTag = tags.find(tag => tag.includes(`${odoo_version}-pr`));
+
+            const body = `
+            Test docker image for this PR:
+            \`\`\`
+            ${prTag}
+            \`\`\`
+            `;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
