@@ -9,6 +9,19 @@
     ocb: https://github.com/OCA/OCB.git
     odoo: https://github.com/odoo/odoo.git
     openupgrade: https://github.com/OCA/OpenUpgrade.git
-  target: ocb $ODOO_VERSION
+  target: odoo $ODOO_VERSION
   merges:
     - ocb $ODOO_VERSION
+
+./web:
+  defaults:
+    depth: 500
+  remotes:
+    oca-web: https://github.com/OCA/web.git
+    px-web: https://github.com/Pyxiris/web.git
+  target: agg
+  merges:
+    - oca-web $ODOO_VERSION
+    - px-web 18.0-web_dark_mode
+    - px-web 18.0-web_responsive
+    - px-web 18.0-web_theme_classic

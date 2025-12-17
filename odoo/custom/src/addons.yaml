@@ -1,4 +1,4 @@
-web:
+./web:
   - web_responsive
   - web_refresher
   - web_theme_classic
@@ -10,3 +10,8 @@ web:
   - web_tree_many2one_clickable
   - web_widget_domain_editor_dialog
   - web_widget_open_tab
+  - web_dark_mode
+
+./spreadsheet:
+  - spreadsheet_oca
+  - spreadsheet_dashboard
