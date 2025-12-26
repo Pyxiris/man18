@@ -36,7 +36,47 @@ services:
       - db:/var/lib/postgresql/data:z
 
   smtpfake:
-    image: docker.io/mailhog/mailhog
+    image: docker.io/axllent/mailpit
+    environment:
+      MP_SMTP_RELAY_ALL: "true"
+      MP_SMTP_RELAY_ALLOW_INSECURE: "true"
+      MP_SMTP_RELAY_PRESERVE_MESSAGE_IDS: "true"
+
+  mailserver_fake:
+    image: ghcr.io/docker-mailserver/docker-mailserver:latest
+    hostname: mailserver.manmanufacturing.com
+    environment:
+      PERMIT_DOCKER: connected-networks
+      POSTFIX_INET_PROTOCOLS: ipv4
+      ENABLE_AMAVIS: 0
+      ENABLE_OPENDKIM: 0
+      ENABLE_OPENDMARC: 0
+      ENABLE_POLICYD_SPF: 0
+      ENABLE_SRS: 0
+      ENABLE_QUOTAS: 0
+      ODOO_RECEIVING_DOMAINS: manmanufacturing.com
+    entrypoint:
+      - bash
+      - -c
+      - |
+        cp -r /tmp/docker-mailserver-staging/ /tmp/docker-mailserver
+        chmod 755 /tmp/docker-mailserver/create-config.sh
+        /tmp/docker-mailserver/create-config.sh
+        exec supervisord -c /etc/supervisor/supervisord.conf
+    volumes:
+      - ./mail-testing-config/docker-mailserver/:/tmp/docker-mailserver-staging/:ro
+      - ./odoo/custom/src/odoo/addons/mail/static/scripts/odoo-mailgate.py:/tmp/odoo-mailgate.py:ro
+
+  email_client_fake:
+    image: roundcube/roundcubemail
+    environment:
+      ROUNDCUBEMAIL_COMPOSER_PLUGINS: "texxasrulez/persistent_login"
+      ROUNDCUBEMAIL_PLUGINS: "show_additional_headers,persistent_login,autocreate_identity"
+    depends_on:
+      - mailserver
+    volumes:
+      - ./mail-testing-config/roundcube/roundcube_user_settings.inc.php:/var/roundcube/config/config.inc.php:ro
+      - ./mail-testing-config/roundcube/plugins/autocreate_identity:/var/www/html/plugins/autocreate_identity
 
   smtpreal:
     image: ghcr.io/docker-mailserver/docker-mailserver:latest

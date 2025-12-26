@@ -4,14 +4,17 @@
     # Shallow repositories ($DEPTH_DEFAULT=1) are faster & thinner
     # You may need a bigger depth when merging PRs (use $DEPTH_MERGE
     # for a sane value of 100 commits)
-    depth: $DEPTH_DEFAULT
+    depth: 300
   remotes:
+    px-odoo: https://github.com/Pyxiris/odoo.git
     ocb: https://github.com/OCA/OCB.git
     odoo: https://github.com/odoo/odoo.git
     openupgrade: https://github.com/OCA/OpenUpgrade.git
-  target: odoo $ODOO_VERSION
+  target: agg
   merges:
     - ocb $ODOO_VERSION
+    - odoo $ODOO_VERSION
+    - odoo refs/pull/241583/head # Backport improvements to the odoo-mailgate script in 19.0 to 18.0
 
 ./web:
   defaults:
@@ -25,3 +28,12 @@
     - px-web 18.0-web_dark_mode
     - px-web 18.0-web_responsive
     - px-web 18.0-web_theme_classic
+
+./mail:
+  defaults:
+    depth: $DEPTH_DEFAULT
+  remotes:
+    oca-mail: https://github.com/OCA/mail.git
+  target: agg
+  merges:
+    - oca-mail $ODOO_VERSION

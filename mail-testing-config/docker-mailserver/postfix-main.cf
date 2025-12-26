@@ -1,0 +1,4 @@
+smtpd_client_restrictions =
+    check_client_access regexp:/tmp/docker-mailserver/postfix-client-access.cf
+
+transport_maps = texthash:/tmp/docker-mailserver/postfix-transport-map.cf

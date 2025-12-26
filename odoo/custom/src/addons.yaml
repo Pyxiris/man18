@@ -15,3 +15,7 @@
 ./spreadsheet:
   - spreadsheet_oca
   - spreadsheet_dashboard
+
+./mail:
+  - mail_composer_cc_bcc
+  - mail_tracking

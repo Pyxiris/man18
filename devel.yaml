@@ -64,6 +64,7 @@ services:
       - --limit-time-real=9999999
       - --workers=0
       - --dev=reload,qweb,werkzeug,xml
+      - --from-filter=manmanufacturing.com
 
   db:
     extends:
@@ -90,6 +91,37 @@ services:
     networks: *public
     ports:
       - "127.0.0.1:18025:8025"
+    environment:
+      MP_SMTP_RELAY_HOST: &mailserver mailserver
+
+  mailserver:
+    extends:
+      file: common.yaml
+      service: mailserver_fake
+    networks:
+      default:
+    environment:
+      ODOO_DB: *dbname
+      USER_ID: 2
+      MAILBOX_DOMAIN: *mailserver
+      MAILBOX_USER: admin
+      ADMIN_PASSWORD: admin
+      SMTP_SERVICE_NAME: smtp
+
+  roundcube:
+    extends:
+      file: common.yaml
+      service: email_client_fake
+    networks: *public
+    ports:
+      - "127.0.0.1:18080:80"
+    environment:
+      ROUNDCUBEMAIL_USERNAME_DOMAIN: *mailserver
+      ROUNDCUBEMAIL_DEFAULT_HOST: *mailserver
+      ROUNDCUBEMAIL_SMTP_SERVER: *mailserver
+      ROUNDCUBEMAIL_SMTP_PORT: 25
+    volumes:
+      - roundcube:/var/www/html:rw
 
   wdb:
     image: docker.io/kozea/wdb
@@ -174,3 +206,4 @@ networks:
 volumes:
   filestore:
   db:
+  roundcube:
