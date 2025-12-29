@@ -45,58 +45,53 @@ services:
       traefik.http.services.man18-18-0-test-longpolling.loadbalancer.server.port: 8072
       traefik.http.routers.man18-18-0-test-longpolling-0.rule:
         Host(`test.manmanufacturing.com`) && Path(`/websocket`)
-      traefik.http.routers.man18-18-0-test-longpolling-0.service:
-        man18-18-0-test-longpolling
+      traefik.http.routers.man18-18-0-test-longpolling-0.service: man18-18-0-test-longpolling
       traefik.http.routers.man18-18-0-test-longpolling-0.middlewares:
-        man18-18-0-test-addSTS, man18-18-0-test-forceSecure, man18-18-0-test-override-ws-headers
-      traefik.http.routers.man18-18-0-test-longpolling-0.priority: 10
+        man18-18-0-test-addSTS, man18-18-0-test-forceSecure,
+        man18-18-0-test-override-ws-headers
+      traefik.http.routers.man18-18-0-test-longpolling-0.priority: 20
       traefik.http.routers.man18-18-0-test-longpolling-secure-0.rule:
         Host(`test.manmanufacturing.com`) && Path(`/websocket`)
-      traefik.http.routers.man18-18-0-test-longpolling-secure-0.service:
-        man18-18-0-test-longpolling
+      traefik.http.routers.man18-18-0-test-longpolling-secure-0.service: man18-18-0-test-longpolling
       traefik.http.routers.man18-18-0-test-longpolling-secure-0.middlewares:
-        man18-18-0-test-addSTS, man18-18-0-test-forceSecure, man18-18-0-test-override-ws-headers
-      traefik.http.routers.man18-18-0-test-longpolling-secure-0.priority: 10
+        man18-18-0-test-addSTS, man18-18-0-test-forceSecure,
+        man18-18-0-test-override-ws-headers
+      traefik.http.routers.man18-18-0-test-longpolling-secure-0.priority: 20
       traefik.http.routers.man18-18-0-test-longpolling-secure-0.tls: "true"
-      traefik.http.routers.man18-18-0-test-longpolling-secure-0.tls.certResolver:
-        letsencrypt
+      traefik.http.routers.man18-18-0-test-longpolling-secure-0.tls.certResolver: letsencrypt
       traefik.http.routers.man18-18-0-test-forbiddenCrawlers-0.rule:
         Host(`test.manmanufacturing.com`) && (PathPrefix(`/`))
-      traefik.http.routers.man18-18-0-test-forbiddenCrawlers-0.service:
-        man18-18-0-test-main
+      traefik.http.routers.man18-18-0-test-forbiddenCrawlers-0.service: man18-18-0-test-main
       traefik.http.routers.man18-18-0-test-forbiddenCrawlers-0.middlewares:
-        man18-18-0-test-addSTS, man18-18-0-test-buffering, man18-18-0-test-compress, man18-18-0-test-forbid-crawlers, man18-18-0-test-forceSecure
+        man18-18-0-test-addSTS, man18-18-0-test-buffering, man18-18-0-test-compress,
+        man18-18-0-test-forbid-crawlers, man18-18-0-test-forceSecure
       traefik.http.routers.man18-18-0-test-forbiddenCrawlers-0.priority: 10
       traefik.http.routers.man18-18-0-test-forbiddenCrawlers-secure-0.rule:
         Host(`test.manmanufacturing.com`) && (PathPrefix(`/`))
-      traefik.http.routers.man18-18-0-test-forbiddenCrawlers-secure-0.service:
-        man18-18-0-test-main
+      traefik.http.routers.man18-18-0-test-forbiddenCrawlers-secure-0.service: man18-18-0-test-main
       traefik.http.routers.man18-18-0-test-forbiddenCrawlers-secure-0.middlewares:
-        man18-18-0-test-addSTS, man18-18-0-test-buffering, man18-18-0-test-compress, man18-18-0-test-forbid-crawlers, man18-18-0-test-forceSecure
+        man18-18-0-test-addSTS, man18-18-0-test-buffering, man18-18-0-test-compress,
+        man18-18-0-test-forbid-crawlers, man18-18-0-test-forceSecure
       traefik.http.routers.man18-18-0-test-forbiddenCrawlers-secure-0.priority: 10
       traefik.http.routers.man18-18-0-test-forbiddenCrawlers-secure-0.tls: "true"
-      traefik.http.routers.man18-18-0-test-forbiddenCrawlers-secure-0.tls.certResolver:
-        letsencrypt
+      traefik.http.routers.man18-18-0-test-forbiddenCrawlers-secure-0.tls.certResolver: letsencrypt
       traefik.http.middlewares.man18-18-0-test-redirect-1.redirectRegex.permanent: "true"
       traefik.http.middlewares.man18-18-0-test-redirect-1.redirectRegex.regex: ^(.*)://([^/]+)/(.*)$$
       traefik.http.middlewares.man18-18-0-test-redirect-1.redirectRegex.replacement: $$1://test.manmanufacturing.com/$$3
-      traefik.http.routers.man18-18-0-test-redirect-1.rule:
-        Host(`www.test.manmanufacturing.com`)
-      traefik.http.routers.man18-18-0-test-redirect-1.service:
-        man18-18-0-test-main
+      traefik.http.routers.man18-18-0-test-redirect-1.rule: Host(`www.test.manmanufacturing.com`)
+      traefik.http.routers.man18-18-0-test-redirect-1.service: man18-18-0-test-main
       traefik.http.routers.man18-18-0-test-redirect-1.middlewares:
-        man18-18-0-test-addSTS, man18-18-0-test-compress, man18-18-0-test-forceSecure, man18-18-0-test-redirect-1
+        man18-18-0-test-addSTS, man18-18-0-test-compress, man18-18-0-test-forceSecure,
+        man18-18-0-test-redirect-1
       traefik.http.routers.man18-18-0-test-redirect-1.priority: 10
-      traefik.http.routers.man18-18-0-test-redirect-secure-1.rule:
-        Host(`www.test.manmanufacturing.com`)
-      traefik.http.routers.man18-18-0-test-redirect-secure-1.service:
-        man18-18-0-test-main
+      traefik.http.routers.man18-18-0-test-redirect-secure-1.rule: Host(`www.test.manmanufacturing.com`)
+      traefik.http.routers.man18-18-0-test-redirect-secure-1.service: man18-18-0-test-main
       traefik.http.routers.man18-18-0-test-redirect-secure-1.middlewares:
-        man18-18-0-test-addSTS, man18-18-0-test-compress, man18-18-0-test-forceSecure, man18-18-0-test-redirect-1
+        man18-18-0-test-addSTS, man18-18-0-test-compress, man18-18-0-test-forceSecure,
+        man18-18-0-test-redirect-1
       traefik.http.routers.man18-18-0-test-redirect-secure-1.priority: 10
       traefik.http.routers.man18-18-0-test-redirect-secure-1.tls: "true"
-      traefik.http.routers.man18-18-0-test-redirect-secure-1.tls.certResolver:
-        letsencrypt
+      traefik.http.routers.man18-18-0-test-redirect-secure-1.tls.certResolver: letsencrypt
     command:
       - odoo
       - --workers=3
@@ -113,7 +108,7 @@ services:
     networks:
       default:
         aliases:
-            - "man18-18-0-test-db"
+          - "man18-18-0-test-db"
     restart: unless-stopped
 
   smtp:
@@ -139,26 +134,27 @@ services:
       traefik.http.middlewares.man18-18-0-test-buffering.buffering.retryExpression:
         IsNetworkError() && Attempts() < 5
       traefik.http.middlewares.man18-18-0-test-compress.compress: "true"
-      ? traefik.http.middlewares.man18-18-0-test-forbid-crawlers.headers.customResponseHeaders.X-Robots-Tag
-      : "noindex, nofollow"
+      traefik.http.middlewares.man18-18-0-test-forbid-crawlers.headers.customResponseHeaders.X-Robots-Tag:
+        "noindex, nofollow"
       traefik.http.middlewares.man18-18-0-test-addSTS.headers.forceSTSHeader: "true"
       traefik.http.middlewares.man18-18-0-test-forceSecure.redirectScheme.scheme: https
       traefik.http.middlewares.man18-18-0-test-forceSecure.redirectScheme.permanent: "true"
       traefik.http.routers.man18-18-0-test-mailhog-0.rule:
         Host(`test.manmanufacturing.com`) && PathPrefix(`/smtpfake/`)
-      traefik.http.routers.man18-18-0-test-mailhog-0.service:
-        man18-18-0-test-mailhog
+      traefik.http.routers.man18-18-0-test-mailhog-0.service: man18-18-0-test-mailhog
       traefik.http.routers.man18-18-0-test-mailhog-0.middlewares:
-        man18-18-0-test-addSTS, man18-18-0-test-buffering, man18-18-0-test-compress, man18-18-0-test-forbid-crawlers, man18-18-0-test-forceSecure, man18-18-0-test-mailhog-stripprefix
+        man18-18-0-test-addSTS, man18-18-0-test-buffering, man18-18-0-test-compress,
+        man18-18-0-test-forbid-crawlers, man18-18-0-test-forceSecure,
+        man18-18-0-test-mailhog-stripprefix
       traefik.http.routers.man18-18-0-test-mailhog-secure-0.rule:
         Host(`test.manmanufacturing.com`) && PathPrefix(`/smtpfake/`)
-      traefik.http.routers.man18-18-0-test-mailhog-secure-0.service:
-        man18-18-0-test-mailhog
+      traefik.http.routers.man18-18-0-test-mailhog-secure-0.service: man18-18-0-test-mailhog
       traefik.http.routers.man18-18-0-test-mailhog-secure-0.middlewares:
-        man18-18-0-test-addSTS, man18-18-0-test-buffering, man18-18-0-test-compress, man18-18-0-test-forbid-crawlers, man18-18-0-test-forceSecure, man18-18-0-test-mailhog-stripprefix
+        man18-18-0-test-addSTS, man18-18-0-test-buffering, man18-18-0-test-compress,
+        man18-18-0-test-forbid-crawlers, man18-18-0-test-forceSecure,
+        man18-18-0-test-mailhog-stripprefix
       traefik.http.routers.man18-18-0-test-mailhog-secure-0.tls: "true"
-      traefik.http.routers.man18-18-0-test-mailhog-secure-0.tls.certResolver:
-        letsencrypt
+      traefik.http.routers.man18-18-0-test-mailhog-secure-0.tls.certResolver: letsencrypt
     volumes:
       - "smtpconf:/etc/mailhog:ro,z"
     entrypoint: [sh, -c]

@@ -4,6 +4,7 @@ This file is to be executed with https://www.pyinvoke.org/ in Python 3.8.1+.
 
 Contains common helpers to develop using this child project.
 """
+
 import json
 import os
 import shutil
@@ -537,7 +538,7 @@ def lint(c, verbose=False):
 
 
 @task()
-def start(c, detach=True, debugpy=False, _reload=True):
+def start(c, detach=True, debugpy=False, _reload=True, port_prefix=0):
     """Start environment."""
     cmd = DOCKER_COMPOSE_CMD + " up"
     with tempfile.NamedTemporaryFile(
@@ -557,13 +558,16 @@ def start(c, detach=True, debugpy=False, _reload=True):
         if detach:
             cmd += " --detach"
         with c.cd(str(PROJECT_ROOT)):
+            env = dict(
+                UID_ENV,
+                DOODBA_DEBUGPY_ENABLE=str(int(debugpy)),
+            )
+            if port_prefix:
+                env["PORT_PREFIX"] = str(port_prefix)
             result = c.run(
                 cmd,
                 pty=True,
-                env=dict(
-                    UID_ENV,
-                    DOODBA_DEBUGPY_ENABLE=str(int(debugpy)),
-                ),
+                env=env,
             )
             if not (
                 "Recreating" in result.stdout
@@ -1009,11 +1013,23 @@ def resetdb(
         )
         lang = os.getenv("INITIAL_LANG")
         lang_opt = f" --lang {lang}" if lang else ""
-        c.run(
-            f"{_run} click-odoo-initdb -n {dbname} -m {modules}{lang_opt}",
-            env=UID_ENV,
-            pty=True,
-        )
+        if ODOO_VERSION >= 19:
+            # Odoo 19: Registry.new(force_demo=...) removed → avoid click-odoo-initdb
+            # Use native Odoo CLI; --without-demo=all replaces force_demo=False
+            lang_opt19 = f" --load-language={lang}" if lang else ""
+            c.run(
+                f"{_run} odoo --stop-after-init -d {dbname} -i {modules}"
+                f"{lang_opt19} --without-demo=all",
+                env=UID_ENV,
+                pty=True,
+            )
+        else:
+            # Older versions keep using click-odoo-initdb
+            c.run(
+                f"{_run} click-odoo-initdb -n {dbname} -m {modules}{lang_opt}",
+                env=UID_ENV,
+                pty=True,
+            )
     if populate and ODOO_VERSION < 11:
         _logger.warn(
             f"Skipping populate task as it is not available in v{ODOO_VERSION}"
