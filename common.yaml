@@ -6,7 +6,7 @@ services:
     build:
       context: ./odoo
       args:
-        DB_VERSION: "16"
+        DB_VERSION: "17"
         ODOO_VERSION: "18.0"
         UID: "${UID:-1000}"
         GID: "${GID:-1000}"
@@ -25,7 +25,7 @@ services:
       traefik.port: "8069"
 
   db:
-    image: ghcr.io/tecnativa/postgres-autoconf:16-alpine
+    image: ghcr.io/tecnativa/postgres-autoconf:17-alpine
     shm_size: 4gb
     environment:
       POSTGRES_DB: *dbname
@@ -111,7 +111,7 @@ services:
     hostname: backup.manmanufacturing.com
     init: true
     environment:
-      DB_VERSION: "16"
+      DB_VERSION: "17"
       DBS_TO_INCLUDE: "^prod"
       DST: "boto3+s3://man18-backup"
       EMAIL_FROM: "backups@manmanufacturing.com"
