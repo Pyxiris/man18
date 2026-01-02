@@ -114,7 +114,7 @@ services:
       service: email_client_fake
     networks: *public
     ports:
-      - "127.0.0.1:18080:80"
+      - "127.0.0.1:${PORT_PREFIX:-18}080:80"
     environment:
       ROUNDCUBEMAIL_USERNAME_DOMAIN: *mailserver
       ROUNDCUBEMAIL_DEFAULT_HOST: *mailserver
