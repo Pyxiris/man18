@@ -25,13 +25,12 @@
   target: agg
   merges:
     - oca-web $ODOO_VERSION
-    - px-web 18.0-web_dark_mode
     - px-web 18.0-web_responsive
     - px-web 18.0-web_theme_classic
 
 ./mail:
   defaults:
-    depth: $DEPTH_DEFAULT
+    depth: $DEPTH_MERGE
   remotes:
     oca-mail: https://github.com/OCA/mail.git
   target: agg

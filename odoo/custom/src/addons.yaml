@@ -19,3 +19,12 @@
 ./mail:
   - mail_composer_cc_bcc
   - mail_tracking
+  - mail_attach_existing_attachment
+  - mail_attach_existing_attachment_account
+  - mail_autosubscribe
+  - mail_debrand
+  - mail_optional_follower_notification
+  - mail_partner_opt_out
+  - mail_restrict_follower_selection
+# ./exp-odoo:
+#   - mail_send_single_message
