@@ -1,30 +1,28 @@
 ./web:
   - web_responsive
-  - web_refresher
-  - web_theme_classic
-  - web_copy_confirm
+  # - web_refresher
+  # - web_theme_classic
+  # - web_copy_confirm
   - web_favicon
-  - web_pivot_computed_measure
-  - web_remember_tree_column_width
-  - web_timeline
-  - web_tree_many2one_clickable
-  - web_widget_domain_editor_dialog
-  - web_widget_open_tab
+  # - web_pivot_computed_measure
+  # - web_remember_tree_column_width
+  # - web_timeline
+  # - web_tree_many2one_clickable
+  # - web_widget_domain_editor_dialog
+  # - web_widget_open_tab
   - web_dark_mode
 
-./spreadsheet:
-  - spreadsheet_oca
-  - spreadsheet_dashboard
+# ./spreadsheet:
+#   - spreadsheet_oca
+#   - spreadsheet_dashboard
 
-./mail:
-  - mail_composer_cc_bcc
-  - mail_tracking
-  - mail_attach_existing_attachment
-  - mail_attach_existing_attachment_account
-  - mail_autosubscribe
-  - mail_debrand
-  - mail_optional_follower_notification
-  - mail_partner_opt_out
-  - mail_restrict_follower_selection
-# ./exp-odoo:
-#   - mail_send_single_message
+# ./mail:
+#   - mail_composer_cc_bcc
+#   - mail_tracking
+#   - mail_attach_existing_attachment
+#   - mail_attach_existing_attachment_account
+#   - mail_autosubscribe
+#   - mail_debrand
+#   - mail_optional_follower_notification
+#   - mail_partner_opt_out
+#   - mail_restrict_follower_selection

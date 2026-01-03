@@ -29,7 +29,7 @@ odoo_listdb: false
 odoo_listdb_staging: true
 odoo_oci_image: ghcr.io/pyxiris/man18
 odoo_proxy: traefik
-odoo_version: 18.0
+odoo_version: 19.0
 paths_with_crawlers:
   - /web/image/website
 paths_without_crawlers:
