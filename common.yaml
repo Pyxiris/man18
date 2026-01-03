@@ -2,12 +2,12 @@ version: "2.4"
 
 services:
   odoo:
-    image: ghcr.io/pyxiris/man18:18.0
+    image: ghcr.io/pyxiris/man18:19.0
     build:
       context: ./odoo
       args:
         DB_VERSION: "17"
-        ODOO_VERSION: "18.0"
+        ODOO_VERSION: "19.0"
         UID: "${UID:-1000}"
         GID: "${GID:-1000}"
     environment:

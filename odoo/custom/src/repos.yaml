@@ -14,7 +14,6 @@
   merges:
     - ocb $ODOO_VERSION
     - odoo $ODOO_VERSION
-    - odoo refs/pull/241583/head # Backport improvements to the odoo-mailgate script in 19.0 to 18.0
 
 ./web:
   defaults:
@@ -25,14 +24,13 @@
   target: agg
   merges:
     - oca-web $ODOO_VERSION
-    - px-web 18.0-web_responsive
-    - px-web 18.0-web_theme_classic
+    - px-web 19.0-mig-web_dark_mode
 
-./mail:
-  defaults:
-    depth: $DEPTH_MERGE
-  remotes:
-    oca-mail: https://github.com/OCA/mail.git
-  target: agg
-  merges:
-    - oca-mail $ODOO_VERSION
+# ./mail:
+#   defaults:
+#     depth: $DEPTH_MERGE
+#   remotes:
+#     oca-mail: https://github.com/OCA/mail.git
+#   target: agg
+#   merges:
+#     - oca-mail $ODOO_VERSION
