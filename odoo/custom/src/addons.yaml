@@ -26,3 +26,9 @@
 #   - mail_optional_follower_notification
 #   - mail_partner_opt_out
 #   - mail_restrict_follower_selection
+
+./server-brand:
+  - disable_odoo_online
+  - website_debranding
+  - mail_debranding
+  - sale_portal_debranding

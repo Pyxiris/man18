@@ -34,3 +34,14 @@
 #   target: agg
 #   merges:
 #     - oca-mail $ODOO_VERSION
+
+./server-brand:
+  defaults:
+    depth: 300
+  remotes:
+    oca-server-brand: https://github.com/OCA/server-brand.git
+  target: agg
+  merges:
+    - oca-server-brand $ODOO_VERSION
+    - oca-server-brand refs/pull/113/head
+    - oca-server-brand refs/pull/120/head
