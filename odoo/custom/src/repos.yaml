@@ -9,7 +9,7 @@
     px-odoo: https://github.com/Pyxiris/odoo.git
     ocb: https://github.com/OCA/OCB.git
     odoo: https://github.com/odoo/odoo.git
-    openupgrade: https://github.com/OCA/OpenUpgrade.git
+    # openupgrade: https://github.com/OCA/OpenUpgrade.git
   target: agg
   merges:
     - ocb $ODOO_VERSION
@@ -43,5 +43,5 @@
   target: agg
   merges:
     - oca-server-brand $ODOO_VERSION
-    - oca-server-brand refs/pull/113/head
-    - oca-server-brand refs/pull/120/head
+    - oca-server-brand refs/pull/111/head # [19.0][ADD] web_debranding: add
+    - oca-server-brand refs/pull/120/head # [19.0][ADD] sale_portal_debranding: Remove Odoo branding from sale portal page
