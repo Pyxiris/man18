@@ -134,6 +134,10 @@ services:
       traefik.http.routers.man18-19-0-prod-redirect-secure-1.priority: 10
       traefik.http.routers.man18-19-0-prod-redirect-secure-1.tls: "true"
       traefik.http.routers.man18-19-0-prod-redirect-secure-1.tls.certResolver: letsencrypt
+    command:
+      - odoo
+      - --workers=4
+      - --max-cron-threads=1
 
   db:
     extends:
