@@ -80,6 +80,7 @@ networks:
     internal: true
     driver_opts:
       encrypted: 1
+      com.docker.network.bridge.name: "inv_shared_br"
   private:
     internal: true
     driver_opts:

@@ -198,6 +198,30 @@ services:
       traefik.tcp.services.man18-19-0-prod-smtp-tcp.loadbalancer.serverstransport: proxyprotocolv2@file
       traefik.tcp.services.man18-19-0-prod-smtp-tcp.loadbalancer.server.port: 12525
 
+  email-gatekeeper:
+    image: ghcr.io/pyxiris/docker-spf-whitelisting:latest
+    privileged: false
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_ADMIN
+    network_mode: "host"
+    environment:
+      WATCHED_PORT: *incoming_smtp_port
+      # In order to whitelist inter container traffic from Traefik to the SMTP server,
+      # we need to whitelist the inverseproxy_shared subnet which is usually named
+      # br-<randnum> and changes on restart. We give it a name using com.docker.network.bridge.name:
+      # so that we can find it in iptables without dangerouus permissions
+      BRIDGE_INTERFACE: inv_shared_br
+      WHITELISTED_SPF: _spf.google.com
+      WHITELISTED_REVERSE_DNS_ROOT_DOMAIN: unverified-forwarding.1e100.net
+      ENABLE_REVERSE_DNS: 1
+      SPF_CHECK_INTERVAL: 86400
+      CLEAN_ON_EXIT: 1
+    restart: unless-stopped
+
   backup:
     extends:
       file: common.yaml
