@@ -91,16 +91,16 @@ services:
     cap_add:
       - SYS_PTRACE
     environment:
-      DEFAULT_RELAY_HOST: "[smtp-relay.brevo.com]:587"
+      DEFAULT_RELAY_HOST: "[mail.smtp2go.com]:2525"
       DMS_DEBUG: 0
       ENABLE_SRS: 1
       ONE_DIR: 1
       PERMIT_DOCKER: connected-networks
       POSTFIX_INET_PROTOCOLS: ipv4
       POSTFIX_MESSAGE_SIZE_LIMIT: 52428800 # 50 MiB
-      RELAY_HOST: "smtp-relay.brevo.com"
-      RELAY_PORT: "587"
-      RELAY_USER: "95fbdc001@smtp-brevo.com"
+      RELAY_HOST: "mail.smtp2go.com"
+      RELAY_PORT: "2525"
+      RELAY_USER: "manmanufacturing.com"
       SMTP_ONLY: 1
       SRS_DOMAINNAME: "manmanufacturing.com"
       SRS_EXCLUDE_DOMAINS: "manmanufacturing.com"

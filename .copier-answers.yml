@@ -45,8 +45,8 @@ project_name: man18
 smtp_canonical_default: manmanufacturing.com
 smtp_canonical_domains: []
 smtp_default_from: notifications@manmanufacturing.com
-smtp_relay_host: smtp-relay.brevo.com
-smtp_relay_port: 587
-smtp_relay_user: 95fbdc001@smtp-brevo.com
+smtp_relay_host: mail.smtp2go.com
+smtp_relay_port: 2525
+smtp_relay_user: manmanufacturing.com
 smtp_relay_version: latest
 traefik_version: 3
