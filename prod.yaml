@@ -7,6 +7,8 @@ services:
       service: odoo
     restart: unless-stopped
     hostname: "manmanufacturing.com"
+    volumes:
+      - mailgate:/opt/odoo/custom/src/odoo/addons/mail/static/scripts:rw,z
     env_file:
       - .docker/odoo.env
       - .docker/db-access.env
@@ -52,12 +54,14 @@ services:
       traefik.http.services.man18-19-0-prod-main.loadbalancer.server.port: 8069
       traefik.http.services.man18-19-0-prod-longpolling.loadbalancer.server.port: 8072
       traefik.http.routers.man18-19-0-prod-main-0.rule: Host(`manmanufacturing.com`)
+      traefik.http.routers.man18-19-0-prod-main-0.entrypoints: web-insecure
       traefik.http.routers.man18-19-0-prod-main-0.service: man18-19-0-prod-main
       traefik.http.routers.man18-19-0-prod-main-0.middlewares:
         man18-19-0-prod-addSTS, man18-19-0-prod-buffering, man18-19-0-prod-compress,
         man18-19-0-prod-forceSecure
       traefik.http.routers.man18-19-0-prod-main-0.priority: 1
       traefik.http.routers.man18-19-0-prod-main-secure-0.rule: Host(`manmanufacturing.com`)
+      traefik.http.routers.man18-19-0-prod-main-secure-0.entrypoints: web-main
       traefik.http.routers.man18-19-0-prod-main-secure-0.service: man18-19-0-prod-main
       traefik.http.routers.man18-19-0-prod-main-secure-0.middlewares:
         man18-19-0-prod-addSTS, man18-19-0-prod-buffering, man18-19-0-prod-compress,
@@ -67,6 +71,7 @@ services:
       traefik.http.routers.man18-19-0-prod-main-secure-0.tls.certResolver: letsencrypt
       traefik.http.routers.man18-19-0-prod-longpolling-0.rule:
         Host(`manmanufacturing.com`) && Path(`/websocket`)
+      traefik.http.routers.man18-19-0-prod-longpolling-0.entrypoints: web-insecure
       traefik.http.routers.man18-19-0-prod-longpolling-0.service: man18-19-0-prod-longpolling
       traefik.http.routers.man18-19-0-prod-longpolling-0.middlewares:
         man18-19-0-prod-addSTS, man18-19-0-prod-forceSecure,
@@ -74,6 +79,7 @@ services:
       traefik.http.routers.man18-19-0-prod-longpolling-0.priority: 20
       traefik.http.routers.man18-19-0-prod-longpolling-secure-0.rule:
         Host(`manmanufacturing.com`) && Path(`/websocket`)
+      traefik.http.routers.man18-19-0-prod-longpolling-secure-0.entrypoints: web-main
       traefik.http.routers.man18-19-0-prod-longpolling-secure-0.service: man18-19-0-prod-longpolling
       traefik.http.routers.man18-19-0-prod-longpolling-secure-0.middlewares:
         man18-19-0-prod-addSTS, man18-19-0-prod-forceSecure,
@@ -84,6 +90,7 @@ services:
       traefik.http.routers.man18-19-0-prod-forbiddenCrawlers-0.rule:
         Host(`manmanufacturing.com`) && (PathPrefix(`/web/`) ||
         PathPrefix(`/website/info/`) || Path(`/web`) || Path(`/website/info`))
+      traefik.http.routers.man18-19-0-prod-forbiddenCrawlers-0.entrypoints: web-insecure
       traefik.http.routers.man18-19-0-prod-forbiddenCrawlers-0.service: man18-19-0-prod-main
       traefik.http.routers.man18-19-0-prod-forbiddenCrawlers-0.middlewares:
         man18-19-0-prod-addSTS, man18-19-0-prod-buffering, man18-19-0-prod-compress,
@@ -92,6 +99,7 @@ services:
       traefik.http.routers.man18-19-0-prod-forbiddenCrawlers-secure-0.rule:
         Host(`manmanufacturing.com`) && (PathPrefix(`/web/`) ||
         PathPrefix(`/website/info/`) || Path(`/web`) || Path(`/website/info`))
+      traefik.http.routers.man18-19-0-prod-forbiddenCrawlers-secure-0.entrypoints: web-main
       traefik.http.routers.man18-19-0-prod-forbiddenCrawlers-secure-0.service: man18-19-0-prod-main
       traefik.http.routers.man18-19-0-prod-forbiddenCrawlers-secure-0.middlewares:
         man18-19-0-prod-addSTS, man18-19-0-prod-buffering, man18-19-0-prod-compress,
@@ -102,6 +110,7 @@ services:
       traefik.http.routers.man18-19-0-prod-allowedCrawlers-0.rule:
         Host(`manmanufacturing.com`) && (PathPrefix(`/web/image/website/`) ||
         Path(`/web/image/website`))
+      traefik.http.routers.man18-19-0-prod-allowedCrawlers-0.entrypoints: web-insecure
       traefik.http.routers.man18-19-0-prod-allowedCrawlers-0.service: man18-19-0-prod-main
       traefik.http.routers.man18-19-0-prod-allowedCrawlers-0.middlewares:
         man18-19-0-prod-addSTS, man18-19-0-prod-buffering, man18-19-0-prod-compress,
@@ -110,6 +119,7 @@ services:
       traefik.http.routers.man18-19-0-prod-allowedCrawlers-secure-0.rule:
         Host(`manmanufacturing.com`) && (PathPrefix(`/web/image/website/`) ||
         Path(`/web/image/website`))
+      traefik.http.routers.man18-19-0-prod-allowedCrawlers-secure-0.entrypoints: web-main
       traefik.http.routers.man18-19-0-prod-allowedCrawlers-secure-0.service: man18-19-0-prod-main
       traefik.http.routers.man18-19-0-prod-allowedCrawlers-secure-0.middlewares:
         man18-19-0-prod-addSTS, man18-19-0-prod-buffering, man18-19-0-prod-compress,
@@ -121,12 +131,14 @@ services:
       traefik.http.middlewares.man18-19-0-prod-redirect-1.redirectRegex.regex: ^(.*)://([^/]+)/(.*)$$
       traefik.http.middlewares.man18-19-0-prod-redirect-1.redirectRegex.replacement: $$1://manmanufacturing.com/$$3
       traefik.http.routers.man18-19-0-prod-redirect-1.rule: Host(`www.manmanufacturing.com`)
+      traefik.http.routers.man18-19-0-prod-redirect-1.entrypoints: web-insecure
       traefik.http.routers.man18-19-0-prod-redirect-1.service: man18-19-0-prod-main
       traefik.http.routers.man18-19-0-prod-redirect-1.middlewares:
         man18-19-0-prod-addSTS, man18-19-0-prod-compress, man18-19-0-prod-forceSecure,
         man18-19-0-prod-redirect-1
       traefik.http.routers.man18-19-0-prod-redirect-1.priority: 10
       traefik.http.routers.man18-19-0-prod-redirect-secure-1.rule: Host(`www.manmanufacturing.com`)
+      traefik.http.routers.man18-19-0-prod-redirect-secure-1.entrypoints: web-main
       traefik.http.routers.man18-19-0-prod-redirect-secure-1.service: man18-19-0-prod-main
       traefik.http.routers.man18-19-0-prod-redirect-secure-1.middlewares:
         man18-19-0-prod-addSTS, man18-19-0-prod-compress, man18-19-0-prod-forceSecure,
@@ -138,6 +150,7 @@ services:
       - odoo
       - --workers=4
       - --max-cron-threads=1
+      - --from-filter=manmanufacturing.com
 
   db:
     extends:
@@ -159,10 +172,54 @@ services:
       service: smtpreal
     env_file:
       - .docker/smtp.env
+      - .docker/odoo.env
+    volumes:
+      - inverseproxy_acme:/etc/letsencrypt:rw,z
+      - mailgate:/tmp/mailgate:ro,z
+      - ./mail-prod-config/user-patches.sh:/tmp/docker-mailserver/user-patches.sh
+    environment:
+      SSL_TYPE: letsencrypt
+      SSL_DOMAIN: manmanufacturing.com
+      MAILGATE_SMTP_PORT: &incoming_smtp_port 12525
+      ODOO_DB: prod
+      ODOO_USER_ID: 2
+      ODOO_RECEIVING_DOMAINS: manmanufacturing.com
     networks:
       default:
         aliases:
           - smtplocal
+      inverseproxy_shared:
+    restart: unless-stopped
+    labels:
+      traefik.enable: "true"
+      traefik.tcp.routers.man18-19-0-prod-smtp-tcp.entrypoints: smtp-incoming
+      traefik.tcp.routers.man18-19-0-prod-smtp-tcp.rule: HostSNI(`*`)
+      traefik.tcp.routers.man18-19-0-prod-smtp-tcp.service: man18-19-0-prod-smtp-tcp
+      traefik.tcp.services.man18-19-0-prod-smtp-tcp.loadbalancer.serverstransport: proxyprotocolv2@file
+      traefik.tcp.services.man18-19-0-prod-smtp-tcp.loadbalancer.server.port: 12525
+
+  email-gatekeeper:
+    image: ghcr.io/pyxiris/docker-spf-whitelisting:latest
+    privileged: false
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_ADMIN
+    network_mode: "host"
+    environment:
+      WATCHED_PORT: *incoming_smtp_port
+      # In order to whitelist inter container traffic from Traefik to the SMTP server,
+      # we need to whitelist the inverseproxy_shared subnet which is usually named
+      # br-<randnum> and changes on restart. We give it a name using com.docker.network.bridge.name:
+      # so that we can find it in iptables without dangerouus permissions
+      BRIDGE_INTERFACE: inv_shared_br
+      WHITELISTED_SPF: _spf.google.com
+      WHITELISTED_REVERSE_DNS_ROOT_DOMAIN: unverified-forwarding.1e100.net
+      ENABLE_REVERSE_DNS: 1
+      SPF_CHECK_INTERVAL: 86400
+      CLEAN_ON_EXIT: 1
     restart: unless-stopped
 
   backup:
@@ -194,3 +251,6 @@ volumes:
   maillogs:
   maillogssupervisord:
   mailstate:
+  mailgate:
+  inverseproxy_acme:
+    external: true

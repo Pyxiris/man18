@@ -8,10 +8,12 @@ services:
       private:
       public:
     volumes:
-      - acme:/etc/traefik/acme:rw,Z
+      - ./traefik_dynamic.yaml:/etc/traefik/traefik_dynamic.yaml:ro
+      - acme:/etc/traefik/acme:rw,z
     ports:
       - 80:80
       - 443:443
+      - 12525:12525
     depends_on:
       - dockersocket
     restart: unless-stopped
@@ -21,6 +23,7 @@ services:
       LEGO_EXPERIMENTAL_CNAME_SUPPORT: "true"
     tty: true
     command:
+      - "--entrypoints.smtp-incoming.address=:12525"
       - "--entrypoints.web-insecure.address=:80"
       - "--entrypoints.web-main.transport.respondingTimeouts.idleTimeout=60s"
       - "--entrypoints.web-main.http.middlewares=global-error-502@docker"
@@ -29,11 +32,12 @@ services:
       - "--providers.docker.exposedbydefault=false"
       - "--providers.docker.network=inverseproxy_shared"
       - "--providers.docker=true"
+      - "--providers.file.filename=/etc/traefik/traefik_dynamic.yaml"
       - "--entrypoints.web-main.address=:443"
       - "--entrypoints.web-main.http.tls.certResolver=letsencrypt"
       - "--certificatesresolvers.letsencrypt.acme.caserver=https://acme-v02.api.letsencrypt.org/directory"
       - "--certificatesresolvers.letsencrypt.acme.email=admin@manmanufacturing.com"
-      - "--certificatesresolvers.letsencrypt.acme.storage=/etc/traefik/acme/acme-v2.json"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/etc/traefik/acme/acme.json"
       - "--entrypoints.web-insecure.http.redirections.entryPoint.to=web-main"
       - "--entrypoints.web-insecure.http.redirections.entryPoint.scheme=https"
       - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web-insecure"
@@ -76,6 +80,7 @@ networks:
     internal: true
     driver_opts:
       encrypted: 1
+      com.docker.network.bridge.name: "inv_shared_br"
   private:
     internal: true
     driver_opts:
