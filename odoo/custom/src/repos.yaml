@@ -15,6 +15,7 @@
     - ocb $ODOO_VERSION
     - odoo $ODOO_VERSION
     - px-odoo 19.0-mail_disable_relay_notification
+    - px-odoo 19.0-web-bring-back-print-button
 
 ./web:
   defaults:
