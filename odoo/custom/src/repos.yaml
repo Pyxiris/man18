@@ -28,15 +28,6 @@
     - oca-web $ODOO_VERSION
     - px-web 19.0-mig-web_dark_mode
 
-# ./mail:
-#   defaults:
-#     depth: $DEPTH_MERGE
-#   remotes:
-#     oca-mail: https://github.com/OCA/mail.git
-#   target: agg
-#   merges:
-#     - oca-mail $ODOO_VERSION
-
 ./server-brand:
   defaults:
     depth: 300
@@ -46,4 +37,3 @@
   merges:
     - oca-server-brand $ODOO_VERSION
     - oca-server-brand refs/pull/111/head # [19.0][ADD] web_debranding: add
-    - oca-server-brand refs/pull/120/head # [19.0][ADD] sale_portal_debranding: Remove Odoo branding from sale portal page
