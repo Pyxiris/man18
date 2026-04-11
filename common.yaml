@@ -1,5 +1,3 @@
-version: "2.4"
-
 services:
   odoo:
     image: ghcr.io/pyxiris/man18:19.0
@@ -17,7 +15,7 @@ services:
       PROXY_MODE: "true"
     tty: true
     volumes:
-      - filestore:/var/lib/odoo:z
+      - filestore:/var/lib/odoo
     labels:
       traefik.backend.buffering.retryExpression: IsNetworkError() && Attempts() < 5
       traefik.docker.network: "inverseproxy_shared"
@@ -30,10 +28,11 @@ services:
     environment:
       POSTGRES_DB: *dbname
       POSTGRES_USER: *dbuser
+      PGDATA: "/var/lib/postgresql/data"
       CONF_EXTRA: |
         work_mem = 512MB
     volumes:
-      - db:/var/lib/postgresql/data:z
+      - db:/var/lib/postgresql/data
 
   smtpfake:
     image: docker.io/axllent/mailpit
@@ -83,11 +82,11 @@ services:
     hostname: "smtp.manmanufacturing.com"
     stop_grace_period: 1m
     volumes:
-      - mailconfig:/tmp/docker-mailserver:z
-      - maildata:/var/mail:z
-      - maillogs:/var/log/mail:z
-      - maillogssupervisord:/var/log/supervisor:z
-      - mailstate:/var/mail-state:z
+      - mailconfig:/tmp/docker-mailserver
+      - maildata:/var/mail
+      - maillogs:/var/log/mail
+      - maillogssupervisord:/var/log/supervisor
+      - mailstate:/var/mail-state
     cap_add:
       - SYS_PTRACE
     environment:
@@ -121,5 +120,5 @@ services:
       SMTP_HOST: smtplocal
       TZ: "America/Detroit"
     volumes:
-      - backup_cache:/root:z
-      - filestore:/mnt/backup/src/odoo:z
+      - backup_cache:/root
+      - filestore:/mnt/backup/src/odoo

@@ -1,5 +1,3 @@
-version: "2.4"
-
 services:
   odoo:
     extends:
@@ -156,7 +154,7 @@ services:
       traefik.http.routers.man18-19-0-test-mailhog-secure-0.tls: "true"
       traefik.http.routers.man18-19-0-test-mailhog-secure-0.tls.certResolver: letsencrypt
     volumes:
-      - "smtpconf:/etc/mailhog:ro,z"
+      - "smtpconf:/etc/mailhog:ro"
     entrypoint: [sh, -c]
     command:
       - test -r /etc/mailhog/auth && export MH_AUTH_FILE=/etc/mailhog/auth; exec MailHog

@@ -7,8 +7,6 @@
 #
 #   git clean -ffd
 
-version: "2.4"
-
 services:
   odoo:
     image: ghcr.io/pyxiris/man18:19.0

@@ -1,13 +1,16 @@
 # Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
-_commit: v9.0.5
+_commit: v9.4.1
 _src_path: gh:Tecnativa/doodba-copier-template
 backup_deletion: false
 backup_dst: boto3+s3://man18-backup
 backup_email_from: backups@manmanufacturing.com
 backup_email_to: admin@manmanufacturing.com
 backup_image_version: latest
+backup_smtp_report_success: true
 backup_tz: America/Detroit
 cidr_whitelist: null
+compose_version: v2+
+domains_migration: {}
 domains_prod:
   - hosts:
       - manmanufacturing.com
@@ -50,3 +53,13 @@ smtp_relay_port: 2525
 smtp_relay_user: manmanufacturing.com
 smtp_relay_version: latest
 traefik_version: 3
+use_refurb: false
+whitelist_docker_project_devel: man18
+whitelisted_hosts_devel:
+  - cdnjs.cloudflare.com
+  - fonts.googleapis.com
+  - fonts.gstatic.com
+  - www.google.com
+  - www.googleapis.com
+  - www.gravatar.com
+whitelisted_hosts_test: []
