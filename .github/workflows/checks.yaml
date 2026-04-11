@@ -36,7 +36,7 @@ jobs:
     steps:
       # First we have to get the workflow files
       - name: Get Workflow files
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           sparse-checkout: | # We avoid checking out the entire repository
             .github/workflows
@@ -44,48 +44,48 @@ jobs:
       - name: Identify Slash Command Checks
         id: get_check_jobs
         run: |
-           all_workflow_checks="{}" # This will store the final JSON output
-           workflow_dir="${{ github.workspace }}/.github/workflows"
-           check_job_prefix="_isCheck_" # This is the prefix that identifies a job as a check
+          all_workflow_checks="{}" # This will store the final JSON output
+          workflow_dir="${{ github.workspace }}/.github/workflows"
+          check_job_prefix="_isCheck_" # This is the prefix that identifies a job as a check
 
-           for file in "$workflow_dir"/*.yml "$workflow_dir"/*.yaml; do
-             if [ ! -f "$file" ]; then continue; fi
+          for file in "$workflow_dir"/*.yml "$workflow_dir"/*.yaml; do
+            if [ ! -f "$file" ]; then continue; fi
 
-             workflow_name=$(yq '.name' "$file")
-             if [ -z "$workflow_name" ] || [ "$workflow_name" == "null" ]; then
-               echo "::warning file=$file::Workflow file has no 'name' property. Skipping."
-               continue
-             fi
+            workflow_name=$(yq '.name' "$file")
+            if [ -z "$workflow_name" ] || [ "$workflow_name" == "null" ]; then
+              echo "::warning file=$file::Workflow file has no 'name' property. Skipping."
+              continue
+            fi
 
-             check_job_ids=$(yq '(.jobs | keys)[]' "$file" | grep -E "^${check_job_prefix}" || true)
-             dispatch_type=$(yq '.on.repository_dispatch.types[0]' "$file")
+            check_job_ids=$(yq '(.jobs | keys)[]' "$file" | grep -E "^${check_job_prefix}" || true)
+            dispatch_type=$(yq '.on.repository_dispatch.types[0]' "$file")
 
-             if [ -n "$check_job_ids" ]; then
-               command="" # Default to empty for non-slash-command workflows
-               if [ -n "$dispatch_type" ] && [ "$dispatch_type" != "null" ]; then
-                 # This is a slash-command workflow, extract the command.
-                 # Use shell parameter expansion to remove the '-command' suffix.
-                 command=${dispatch_type%-command}
-               fi
+            if [ -n "$check_job_ids" ]; then
+              command="" # Default to empty for non-slash-command workflows
+              if [ -n "$dispatch_type" ] && [ "$dispatch_type" != "null" ]; then
+                # This is a slash-command workflow, extract the command.
+                # Use shell parameter expansion to remove the '-command' suffix.
+                command=${dispatch_type%-command}
+              fi
 
-               workflow_checks_array="[]" # Array to hold checks for the current workflow
-               for job_id in $check_job_ids; do
-                 check_job_name=$(yq -o=json "$file" | jq --arg id "$job_id" -r '.jobs[$id].name // $id')
-                 workflow_checks_array=$(echo "$workflow_checks_array" | jq --arg job_id "$job_id" --arg check_name "$check_job_name" '. + [{"job_id": $job_id, "check_name": $check_name}]')
-               done
+              workflow_checks_array="[]" # Array to hold checks for the current workflow
+              for job_id in $check_job_ids; do
+                check_job_name=$(yq -o=json "$file" | jq --arg id "$job_id" -r '.jobs[$id].name // $id')
+                workflow_checks_array=$(echo "$workflow_checks_array" | jq --arg job_id "$job_id" --arg check_name "$check_job_name" '. + [{"job_id": $job_id, "check_name": $check_name}]')
+              done
 
-               workflow_object=$(jq -n --arg cmd "$command" --argjson checks_array "$workflow_checks_array" '{"command": $cmd, "checks": $checks_array}')
-               all_workflow_checks=$(echo "$all_workflow_checks" | jq --arg wf_name "$workflow_name" --argjson wf_obj "$workflow_object" '. + {($wf_name): $wf_obj}')
-             fi
-           done
+              workflow_object=$(jq -n --arg cmd "$command" --argjson checks_array "$workflow_checks_array" '{"command": $cmd, "checks": $checks_array}')
+              all_workflow_checks=$(echo "$all_workflow_checks" | jq --arg wf_name "$workflow_name" --argjson wf_obj "$workflow_object" '. + {($wf_name): $wf_obj}')
+            fi
+          done
 
-           echo "check_jobs=$(echo "$all_workflow_checks" | jq -c .)" >> $GITHUB_OUTPUT
+          echo "check_jobs=$(echo "$all_workflow_checks" | jq -c .)" >> $GITHUB_OUTPUT
         # If use the default token all the checs are in the same group.
         # If you uncomment this step and toggle the lines below with github-token: ${{ steps.generate_token.outputs.token }}
         # your generated checks will be in their own section under the name of your Github App
       # - name: Generate token
       #   id: generate_token
-      #   uses: actions/create-github-app-token@v2
+      #   uses: actions/create-github-app-token@v3
       #   with:
       #     app-id: ${{ vars.PYXIRIS_APP_ID }}
       #     private-key: ${{ secrets.PYXIRIS_APP_SECRET }}
@@ -94,60 +94,60 @@ jobs:
       # The following steps run only for pull request events to create the initial pending checks.
       - name: Create Pending Status Checks
         if: github.event_name == 'pull_request_target'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           # Toggle if using app token
           # github-token: ${{ steps.generate_token.outputs.token }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-             const allCheckJobs = JSON.parse('${{ steps.get_check_jobs.outputs.check_jobs }}');
-             if (Object.keys(allCheckJobs).length === 0) {
-               console.log('No _isCheck_ jobs  found.');
-               return;
-             }
+            const allCheckJobs = JSON.parse('${{ steps.get_check_jobs.outputs.check_jobs }}');
+            if (Object.keys(allCheckJobs).length === 0) {
+              console.log('No _isCheck_ jobs  found.');
+              return;
+            }
 
-             // this runs on pull_request_target, so it uses the direct context.
-             const sha = "${{ github.event.pull_request.head.sha }}";
-             const pr_number = context.payload.pull_request.number;
+            // this runs on pull_request_target, so it uses the direct context.
+            const sha = "${{ github.event.pull_request.head.sha }}";
+            const pr_number = context.payload.pull_request.number;
 
-             for (const workflowName in allCheckJobs) { // e.g., "Build"
-               const workflowData = allCheckJobs[workflowName]; // e.g., { "command": "build", "checks": [...] }
-               const command = workflowData.command;
-               const checksInWorkflow = workflowData.checks;
-               const isSlashCommand = command && command.length > 0;
+            for (const workflowName in allCheckJobs) { // e.g., "Build"
+              const workflowData = allCheckJobs[workflowName]; // e.g., { "command": "build", "checks": [...] }
+              const command = workflowData.command;
+              const checksInWorkflow = workflowData.checks;
+              const isSlashCommand = command && command.length > 0;
 
-               for (const check of checksInWorkflow) { // Iterate through each check defined in the workflow
-                 // Create a unique external_id rather than rely on the display name to reliably find this check later.
-                 // TODO: We could add the sha in here and use it to prevent a check from an old commit from updating
-                 // a check run from a newer commit, but I am not sure how that would behave. Anyways, I have sha checking
-                 // set up independantly further down, so we are already protected against this.
-                 const external_id = `custom_check:${workflowName}:${check.job_id}:${pr_number}`;
+              for (const check of checksInWorkflow) { // Iterate through each check defined in the workflow
+                // Create a unique external_id rather than rely on the display name to reliably find this check later.
+                // TODO: We could add the sha in here and use it to prevent a check from an old commit from updating
+                // a check run from a newer commit, but I am not sure how that would behave. Anyways, I have sha checking
+                // set up independantly further down, so we are already protected against this.
+                const external_id = `custom_check:${workflowName}:${check.job_id}:${pr_number}`;
 
-                 await github.rest.checks.create({
-                   owner: context.repo.owner,
-                   repo: context.repo.repo,
-                   name: check.check_name, // Use the specific check's display name
-                   head_sha: sha,
-                   status: 'queued',
-                   external_id: external_id,
-                   output: {
-                     title: isSlashCommand ? 'Awaiting Slash Command' : 'Automatic Check',
-                     summary: isSlashCommand
-                       ? `This check is awaiting a slash command to be triggered.`
-                       : 'This check will run automatically based on code changes.',
-                     text: isSlashCommand
-                       ? `To run this check, comment \`/${command}\` + any required args on the pull request.`
-                       : 'Results will be reported here upon completion.'
-                   }
-                 });
-               }
-             }
+                await github.rest.checks.create({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: check.check_name, // Use the specific check's display name
+                  head_sha: sha,
+                  status: 'queued',
+                  external_id: external_id,
+                  output: {
+                    title: isSlashCommand ? 'Awaiting Slash Command' : 'Automatic Check',
+                    summary: isSlashCommand
+                      ? `This check is awaiting a slash command to be triggered.`
+                      : 'This check will run automatically based on code changes.',
+                    text: isSlashCommand
+                      ? `To run this check, comment \`/${command}\` + any required args on the pull request.`
+                      : 'Results will be reported here upon completion.'
+                  }
+                });
+              }
+            }
 
       # The following steps run only after a slash command workflow completes, to update the final check status.
       - name: Download client_payload artifact
         if: github.event_name == 'workflow_run'
         id: download_artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: client-payload
           run-id: ${{ github.event.workflow_run.id }}
@@ -155,8 +155,10 @@ jobs:
         continue-on-error: true # Continue to allow graceful skipping if artifact is not found
 
       - name: Update Checks from Workflow Run
-        if: github.event_name == 'workflow_run' && steps.download_artifact.outcome == 'success'
-        uses: actions/github-script@v7
+        if:
+          github.event_name == 'workflow_run' && steps.download_artifact.outcome ==
+          'success'
+        uses: actions/github-script@v9
         with:
           # Toggle if using app token
           # github-token: ${{ steps.generate_token.outputs.token }}

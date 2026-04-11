@@ -11,14 +11,14 @@ jobs:
     steps:
       - name: Generate token
         id: generate_token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         with:
           app-id: ${{ vars.PYXIRIS_APP_ID }}
           private-key: ${{ secrets.PYXIRIS_APP_SECRET }}
           owner: ${{ github.repository_owner }}
 
       - name: Dispatch workflow
-        uses: peter-evans/slash-command-dispatch@v4
+        uses: peter-evans/slash-command-dispatch@v5
         with:
           token: ${{ steps.generate_token.outputs.token }}
           reactions: false
