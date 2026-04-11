@@ -32,6 +32,17 @@
     - oca-web $ODOO_VERSION
     - px-web 19.0-mig-web_dark_mode
 
+./social:
+  defaults:
+    depth: 300
+  remotes:
+    oca-social: https://github.com/OCA/social.git
+    px-social: https://github.com/Pyxiris/social.git
+  target: agg
+  merges:
+    - oca-social $ODOO_VERSION
+    - px-social 19.0-mail_plugin_inject_raw
+
 ./server-brand:
   defaults:
     depth: 300
