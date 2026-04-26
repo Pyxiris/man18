@@ -65,3 +65,6 @@
   - portal_debranding
   - remove_odoo_enterprise
   - sale_portal_debranding
+
+./crm:
+  - crm_project_task
