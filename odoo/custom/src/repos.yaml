@@ -39,3 +39,13 @@
   merges:
     - oca-server-brand $ODOO_VERSION
     - oca-server-brand refs/pull/111/head # [19.0][ADD] web_debranding: add
+
+./crm:
+  defaults:
+    depth: 300
+  remotes:
+    oca-crm: https://github.com/OCA/crm.git
+    px-crm: https://github.com/Pyxiris/crm.git
+  target: agg
+  merges:
+    - oca-crm $ODOO_VERSION
