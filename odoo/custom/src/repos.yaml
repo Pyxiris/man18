@@ -18,6 +18,7 @@
     - px-odoo 19.0-mail_disable_relay_notification
     - px-odoo 19.0-web-bring-back-print-button
     - px-odoo 19.0-always_handle_notifications_in_odoo
+    - px-odoo 19.0-backport-checkbox-improvements-autopatch
 
 ./web:
   defaults:
