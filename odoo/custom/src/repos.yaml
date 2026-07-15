@@ -19,6 +19,7 @@
     - px-odoo 19.0-web-bring-back-print-button
     - px-odoo 19.0-always_handle_notifications_in_odoo
     - px-odoo 19.0-backport-checkbox-improvements-autopatch
+    - px-odoo 19.0-search-both-directions-autopatch # https://github.com/odoo/odoo/pull/276138 merged in odoo master (20.0). Patch for 19.0 only.
 
 ./web:
   defaults:
