@@ -1,5 +1,5 @@
 # Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
-_commit: v9.4.1
+_commit: v9.6.1
 _src_path: gh:Tecnativa/doodba-copier-template
 backup_deletion: false
 backup_dst: boto3+s3://man18-backup
@@ -53,8 +53,9 @@ smtp_relay_port: 2525
 smtp_relay_user: manmanufacturing.com
 smtp_relay_version: latest
 traefik_version: 3
-use_refurb: false
+use_refurb: true
 whitelist_docker_project_devel: man18
+whitelist_docker_project_test: demo-man18-19
 whitelisted_hosts_devel:
   - cdnjs.cloudflare.com
   - fonts.googleapis.com
@@ -62,4 +63,34 @@ whitelisted_hosts_devel:
   - www.google.com
   - www.googleapis.com
   - www.gravatar.com
-whitelisted_hosts_test: []
+whitelisted_hosts_test:
+  - accounts.google.com
+  - api.openrouteservice.org
+  - api.unsplash.com
+  - apis.google.com
+  - cdnjs.cloudflare.com
+  - download.geonames.org
+  - ec.europa.eu
+  - fonts.cdnfonts.com
+  - fonts.googleapis.com
+  - fonts.gstatic.com
+  - images.unsplash.com
+  - iap-services.odoo.com
+  - maps.googleapis.com
+  - media-api.odoo.com
+  - olg.api.odoo.com
+  - www.google.com
+  - www.googleapis.com
+  - www.gravatar.com
+  - undraw.co
+  - updates.maxmind.com
+  - www.ecb.europa.eu
+  - www.xe.com
+  - sis-t.redsys.es
+  - prewww1.aeat.es
+  - www2.agenciatributaria.gob.es
+  - www.openstreetmap.org
+  - nominatim.openstreetmap.org
+  - www.bizkaia.eus
+  - sii.araba.eus
+  - vies.api.odoo.com

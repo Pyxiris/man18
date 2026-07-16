@@ -36,6 +36,11 @@ repos:
       - id: oca-checks-odoo-module
       - id: oca-checks-po
         args: ["--fix"]
+  - repo: https://github.com/dosisod/refurb
+    rev: v2.3.1
+    hooks:
+      - id: refurb
+        exclude: migrations/.*
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.13.0
     hooks:

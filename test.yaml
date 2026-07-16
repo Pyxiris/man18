@@ -22,10 +22,12 @@ services:
     depends_on:
       - db
       - smtp
+      - proxy_general
     networks:
       default:
       globalwhitelist_shared:
       inverseproxy_shared:
+      whitelist:
     labels:
       doodba.domain.main: "test.manmanufacturing.com"
       traefik.enable: "true"
@@ -159,6 +161,51 @@ services:
     command:
       - test -r /etc/mailhog/auth && export MH_AUTH_FILE=/etc/mailhog/auth; exec MailHog
 
+  odoo_net_setup:
+    image: ghcr.io/tecnativa/docker-whitelist-gateway-service:edge
+    network_mode: "service:odoo"
+    cap_add:
+      - NET_ADMIN
+    depends_on:
+      - odoo
+      - proxy_general
+    healthcheck:
+      disable: true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      MODE_RUN: "net_setup"
+      GATEWAY_NAME: "proxy_general"
+      DNS_LOCAL: "1"
+      DNS_INTERNAL_FROM_DOCKER: "1"
+      DOCKER_PROJECT: "${COMPOSE_PROJECT_NAME:-demo-man18-19}"
+      DOCKER_PRIMARY_SERVICE: "odoo"
+      ALLOWED_HOSTS: &proxy_allowed_hosts >-
+        accounts.google.com api.openrouteservice.org api.unsplash.com apis.google.com
+        cdnjs.cloudflare.com download.geonames.org ec.europa.eu fonts.cdnfonts.com
+        fonts.googleapis.com fonts.gstatic.com images.unsplash.com iap-services.odoo.com
+        maps.googleapis.com media-api.odoo.com olg.api.odoo.com www.google.com
+        www.googleapis.com www.gravatar.com undraw.co updates.maxmind.com
+        www.ecb.europa.eu www.xe.com sis-t.redsys.es prewww1.aeat.es
+        www2.agenciatributaria.gob.es www.openstreetmap.org nominatim.openstreetmap.org
+        www.bizkaia.eus sii.araba.eus vies.api.odoo.com
+
+  proxy_general:
+    image: ghcr.io/tecnativa/docker-whitelist-gateway-service:edge
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    sysctls:
+      net.ipv4.ip_forward: "1"
+    networks:
+      whitelist:
+        aliases:
+          - proxy_general
+      public:
+    environment:
+      MODE_RUN: "gateway"
+      ALLOWED_HOSTS: *proxy_allowed_hosts
+
 networks:
   default:
     internal: ${DOODBA_NETWORK_INTERNAL-true}
@@ -170,6 +217,8 @@ networks:
 
   inverseproxy_shared:
     external: true
+  public:
+  whitelist:
 
 volumes:
   filestore:

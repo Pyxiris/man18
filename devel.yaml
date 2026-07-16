@@ -71,6 +71,11 @@ services:
     environment:
       POSTGRES_DB: *dbname
       POSTGRES_PASSWORD: odoopassword
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   pgweb:
     image: docker.io/sosedoff/pgweb
@@ -78,9 +83,10 @@ services:
     ports:
       - "127.0.0.1:${PORT_PREFIX:-19}081:8081"
     environment:
-      DATABASE_URL: postgres://odoo:odoopassword@db:5432/devel?sslmode=disable
+      PGWEB_DATABASE_URL: postgres://odoo:odoopassword@db:5432/devel?sslmode=disable
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   smtp:
     extends:
@@ -151,7 +157,7 @@ services:
       DNS_INTERNAL_FROM_DOCKER: "1"
       DOCKER_PROJECT: "${COMPOSE_PROJECT_NAME:-man18}"
       DOCKER_PRIMARY_SERVICE: "odoo"
-      ALLOWED_HOSTS: >-
+      ALLOWED_HOSTS: &proxy_allowed_hosts >-
         cdnjs.cloudflare.com fonts.googleapis.com fonts.gstatic.com www.google.com
         www.googleapis.com www.gravatar.com
 
@@ -168,9 +174,7 @@ services:
       public:
     environment:
       MODE_RUN: "gateway"
-      ALLOWED_HOSTS: >-
-        cdnjs.cloudflare.com fonts.googleapis.com fonts.gstatic.com www.google.com
-        www.googleapis.com www.gravatar.com
+      ALLOWED_HOSTS: *proxy_allowed_hosts
 networks:
   default:
     internal: ${DOODBA_NETWORK_INTERNAL-true}
