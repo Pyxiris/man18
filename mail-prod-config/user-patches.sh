@@ -1,30 +1,30 @@
 echo "Applying user patches..."
 
-# This lets postfix know that it is ok to relay these domains. Otherwise
-# it would just reject the incoming mail with "Relay access denied".
-postconf -e "relay_domains = $ODOO_RECEIVING_DOMAINS"
-
 # Copy the standard smtp service and make a new one on port 12525
 PORT=${MAILGATE_SMTP_PORT:-12525}
+
+# This lets postfix know that it is ok to relay these domains. Otherwise
+# it would just reject the incoming mail with "Relay access denied".
+postconf -e "relay_domains = ${ODOO_RECEIVING_DOMAINS}"
 
 # Define a custom cleanup service that disables SRS (canonical maps)
 # If we do not do this SRS rewrites the from emal making a bit of a mess.
 # ** Note: This is only set on the smtpd-incoming-odoo service,
 # so outgoing will continue to work with SRS. **
-postconf -Me "cleanup-odoo/unix=cleanup-odoo unix n - n - 0 cleanup"
+postconf -Me "cleanup-odoo-incoming/unix=cleanup-odoo-incoming unix n - n - 0 cleanup"
 postconf -Pe \
-    "cleanup-odoo/unix/sender_canonical_maps=" \
-    "cleanup-odoo/unix/recipient_canonical_maps="
+    "cleanup-odoo-incoming/unix/sender_canonical_maps=" \
+    "cleanup-odoo-incoming/unix/recipient_canonical_maps="
 
-postconf -Me "$PORT/inet=$PORT inet n - n - - smtpd"
+postconf -Me "${PORT}/inet=${PORT} inet n - n - - smtpd"
 # Add configs to this new smtp service
 postconf -Pe \
-    "$PORT/inet/syslog_name=postfix/smtpd-incoming-odoo" \
-    "$PORT/inet/cleanup_service_name=cleanup-odoo" \
-    "$PORT/inet/smtpd_upstream_proxy_protocol=haproxy" \
-    "$PORT/inet/content_filter=odoo_mailgate:dummy" \
-    "$PORT/inet/local_recipient_maps=" \
-    "$PORT/inet/smtpd_recipient_restrictions=permit_mynetworks,permit_auth_destination,reject"
+    "${PORT}/inet/syslog_name=postfix/smtpd-incoming-odoo" \
+    "${PORT}/inet/cleanup_service_name=cleanup-odoo-incoming" \
+    "${PORT}/inet/smtpd_upstream_proxy_protocol=haproxy" \
+    "${PORT}/inet/content_filter=odoo_mailgate:dummy" \
+    "${PORT}/inet/local_recipient_maps=" \
+    "${PORT}/inet/smtpd_recipient_restrictions=permit_mynetworks,permit_auth_destination,reject"
 
 postconf -Me "odoo_mailgate/unix=odoo_mailgate unix - n n - - pipe user=nobody argv=/usr/local/bin/odoo-mailgate-wrapper.py"
 
@@ -44,10 +44,10 @@ def log_message(level, message):
 
 try:
     # Configuration from environment variables
-    DB = "$ODOO_DB"
-    USER = "$ODOO_USER_ID"
-    PASSWORD = "$ADMIN_PASSWORD"
-    SECRET = "$HEADER_SECRET"
+    DB = "${ODOO_DB}"
+    USER = "${ODOO_USER_ID}"
+    PASSWORD = "${ADMIN_PASSWORD}"
+    SECRET = "${HEADER_SECRET}"
 
     if not all([DB, USER, PASSWORD, SECRET]):
         log_message("err", "Odoo mailgate: Missing one or more required environment variables.")
@@ -92,7 +92,15 @@ try:
         sys.exit(0)
 
     # Pipe to odoo-mailgate
-    cmd = ['/usr/bin/python3', '/usr/local/bin/odoo-mailgate.py', '-d', DB, '-u', USER, '-p', PASSWORD, '--host', 'odoo', '--port', '8069']
+    cmd = [
+        "/usr/bin/python3",
+        "/usr/local/bin/odoo-mailgate.py",
+        "-d", DB,
+        "-u", USER,
+        "-p", PASSWORD,
+        "--host", "odoo",
+        "--port", "8069",
+    ]
     proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, text=False)
     try:
         proc.stdin.writelines(headers)

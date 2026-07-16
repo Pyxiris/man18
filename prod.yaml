@@ -5,8 +5,6 @@ services:
       service: odoo
     restart: unless-stopped
     hostname: "manmanufacturing.com"
-    volumes:
-      - mailgate:/opt/odoo/custom/src/odoo/addons/mail/static/scripts:rw,z
     env_file:
       - .docker/odoo.env
       - .docker/db-access.env
@@ -173,7 +171,6 @@ services:
       - .docker/odoo.env
     volumes:
       - inverseproxy_acme:/etc/letsencrypt:rw,z
-      - mailgate:/tmp/mailgate:ro,z
       - ./mail-prod-config/user-patches.sh:/tmp/docker-mailserver/user-patches.sh
     environment:
       SSL_TYPE: letsencrypt
