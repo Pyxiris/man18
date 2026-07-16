@@ -16,6 +16,7 @@ services:
     tty: true
     volumes:
       - filestore:/var/lib/odoo
+      - mailgate:/opt/odoo/custom/src/odoo/addons/mail/static/scripts:rw,z
     labels:
       traefik.backend.buffering.retryExpression: IsNetworkError() && Attempts() < 5
       traefik.docker.network: "inverseproxy_shared"
@@ -53,29 +54,34 @@ services:
       ENABLE_POLICYD_SPF: 0
       ENABLE_SRS: 0
       ENABLE_QUOTAS: 0
+      MAILGATE_SMTP_PORT: "13525"
       ODOO_RECEIVING_DOMAINS: manmanufacturing.com
     entrypoint:
-      - bash
+      - /bin/bash
       - -c
       - |
-        cp -r /tmp/docker-mailserver-staging/ /tmp/docker-mailserver
-        chmod 755 /tmp/docker-mailserver/create-config.sh
-        /tmp/docker-mailserver/create-config.sh
-        exec supervisord -c /etc/supervisor/supervisord.conf
+        set -euo pipefail
+        mkdir -p /tmp/docker-mailserver
+        echo "$${MAILBOX_USER}@$${MAILBOX_DOMAIN}|{PLAIN}$${ADMIN_PASSWORD}" \
+          > /tmp/docker-mailserver/postfix-accounts.cf
+        exec /usr/bin/dumb-init -- supervisord -c /etc/supervisor/supervisord.conf
     volumes:
-      - ./mail-testing-config/docker-mailserver/:/tmp/docker-mailserver-staging/:ro
-      - ./odoo/custom/src/odoo/addons/mail/static/scripts/odoo-mailgate.py:/tmp/odoo-mailgate.py:ro
+      - ./mail-testing-config/docker-mailserver/user-patches.sh:/tmp/docker-mailserver/user-patches.sh:ro
+      - mailgate:/tmp/mailgate:ro,z
 
   email_client_fake:
     image: roundcube/roundcubemail
     environment:
+      ROUNDCUBEMAIL_DB_TYPE: sqlite
       ROUNDCUBEMAIL_COMPOSER_PLUGINS: "texxasrulez/persistent_login"
       ROUNDCUBEMAIL_PLUGINS: "show_additional_headers,persistent_login,autocreate_identity"
     depends_on:
       - mailserver
     volumes:
-      - ./mail-testing-config/roundcube/roundcube_user_settings.inc.php:/var/roundcube/config/config.inc.php:ro
+      - ./mail-testing-config/roundcube/config/roundcube_user_settings.inc.php:/var/roundcube/config/config.inc.php:ro
       - ./mail-testing-config/roundcube/plugins/autocreate_identity:/var/www/html/plugins/autocreate_identity
+      - roundcube:/var/www/html:rw
+      - roundcube_db:/var/roundcube/db:rw
 
   smtpreal:
     image: ghcr.io/docker-mailserver/docker-mailserver:latest
@@ -87,6 +93,7 @@ services:
       - maillogs:/var/log/mail
       - maillogssupervisord:/var/log/supervisor
       - mailstate:/var/mail-state
+      - mailgate:/tmp/mailgate:ro,z
     cap_add:
       - SYS_PTRACE
     environment:
@@ -122,3 +129,6 @@ services:
     volumes:
       - backup_cache:/root
       - filestore:/mnt/backup/src/odoo
+
+volumes:
+  mailgate:
