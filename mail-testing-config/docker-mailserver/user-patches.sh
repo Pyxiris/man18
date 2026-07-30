@@ -8,7 +8,7 @@ SMTP_SERVICE_NAME=${SMTP_SERVICE_NAME:-smtp}
 PORT=${MAILGATE_SMTP_PORT:-13525}
 POSTFIX_DIR=/etc/postfix
 
-# Port 25: redirect Mailpit (Odoo outgoing) into the Roundcube mailbox
+# Port 25: redirect Mailpit (Odoo outgoing) into the webmail test mailbox
 CLIENT_ACCESS="${POSTFIX_DIR}/odoo-outgoing-client-access.cf"
 : > "${CLIENT_ACCESS}"
 echo "/${SMTP_SERVICE_NAME}/ REDIRECT ${MAILBOX_USER}@${MAILBOX_DOMAIN}" >> "${CLIENT_ACCESS}"
@@ -27,7 +27,7 @@ postconf -e "transport_maps = texthash:${TRANSPORT_MAP}"
 
 postconf -e "relay_domains = ${ODOO_RECEIVING_DOMAINS}"
 
-# Port 13525: Incoming to odoo from Roundcube — Odoo domains to mailgate, else to Dovecot
+# Port 13525: Incoming from webmail — Odoo domains to mailgate, else to Dovecot
 CANONICAL="${POSTFIX_DIR}/odoo-incoming-recipient-canonical.cf"
 : > "${CANONICAL}"
 # Catch ODOO_RECEIVING_DOMAINS addresses and map them to themselves.

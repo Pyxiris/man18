@@ -69,19 +69,43 @@ services:
       - ./mail-testing-config/docker-mailserver/user-patches.sh:/tmp/docker-mailserver/user-patches.sh:ro
       - mailgate:/tmp/mailgate:ro,z
 
-  email_client_fake:
-    image: roundcube/roundcubemail
+  email_client_db:
+    image: postgres:17-alpine
     environment:
-      ROUNDCUBEMAIL_DB_TYPE: sqlite
-      ROUNDCUBEMAIL_COMPOSER_PLUGINS: "texxasrulez/persistent_login"
-      ROUNDCUBEMAIL_PLUGINS: "show_additional_headers,persistent_login,autocreate_identity"
-    depends_on:
-      - mailserver
+      POSTGRES_DB: cypht
+      POSTGRES_USER: cypht
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -q -d cypht -U cypht"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  email_client:
+    image: docker.io/cypht/cypht:latest
+    environment:
+      AUTH_TYPE: DB
+      SESSION_TYPE: DB
+      USER_CONFIG_TYPE: DB
+      DB_CONNECTION_TYPE: host
+      DB_DRIVER: pgsql
+      DB_NAME: cypht
+      DB_USER: cypht
+      IMAP_AUTH_PORT: "143"
+      IMAP_AUTH_TLS: "false"
+      DEFAULT_SMTP_PORT: "13525"
+      DEFAULT_SMTP_TLS: "false"
+      DEFAULT_SMTP_NO_AUTH: "true"
+      AUTO_CREATE_PROFILE: "true"
+      ENABLE_REDIS: "false"
+      ENABLE_MEMCACHED: "false"
+      DEFAULT_SETTING_SMTP_COMPOSE_TYPE: "1"
+      DEFAULT_SETTING_INLINE_MESSAGE: "true"
+      DEFAULT_SETTING_THEME: slate
+      CYPHT_MODULES: >-
+        core,contacts,local_contacts,imap,smtp,account,idle_timer,themes,
+        profiles,imap_folders,tags,autocreate_profile
     volumes:
-      - ./mail-testing-config/roundcube/config/roundcube_user_settings.inc.php:/var/roundcube/config/config.inc.php:ro
-      - ./mail-testing-config/roundcube/plugins/autocreate_identity:/var/www/html/plugins/autocreate_identity
-      - roundcube:/var/www/html:rw
-      - roundcube_db:/var/roundcube/db:rw
+      - ./mail-testing-config/cypht/modules/autocreate_profile:/usr/local/share/cypht/modules/autocreate_profile:ro
 
   smtpreal:
     image: ghcr.io/docker-mailserver/docker-mailserver:latest

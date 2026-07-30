@@ -113,18 +113,36 @@ services:
       ADMIN_PASSWORD: admin
       SMTP_SERVICE_NAME: smtp
 
-  roundcube:
+  email_client_db:
     extends:
       file: common.yaml
-      service: email_client_fake
+      service: email_client_db
+    environment:
+      POSTGRES_PASSWORD: cyphpassword
+
+  email_client:
+    extends:
+      file: common.yaml
+      service: email_client
     networks: *public
     ports:
       - "127.0.0.1:${PORT_PREFIX:-19}080:80"
+    depends_on:
+      mailserver:
+        condition: service_started
+      email_client_db:
+        condition: service_healthy
     environment:
-      ROUNDCUBEMAIL_USERNAME_DOMAIN: *mailserver
-      ROUNDCUBEMAIL_DEFAULT_HOST: *mailserver
-      ROUNDCUBEMAIL_SMTP_SERVER: *mailserver
-      ROUNDCUBEMAIL_SMTP_PORT: 13525
+      AUTH_USERNAME: admin
+      AUTH_PASSWORD: admin
+      DISABLE_ORIGIN_CHECK: "true"
+      DB_HOST: email_client_db
+      DB_PASS: cyphpassword
+      IMAP_AUTH_NAME: Mailserver
+      IMAP_AUTH_SERVER: *mailserver
+      DEFAULT_SMTP_NAME: Mailserver
+      DEFAULT_SMTP_SERVER: *mailserver
+      DEFAULT_EMAIL_DOMAIN: *mailserver
 
   wdb:
     image: docker.io/kozea/wdb
@@ -184,8 +202,6 @@ networks:
 volumes:
   filestore:
   db:
-  roundcube:
-  roundcube_db:
   mailgate:
     driver: local
     driver_opts:

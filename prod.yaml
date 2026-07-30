@@ -229,6 +229,34 @@ services:
       - db
       - smtp
 
+  # email_client_db:
+  #   extends:
+  #     file: common.yaml
+  #     service: email_client_db
+  #   restart: unless-stopped
+  #   env_file:
+  #     - .docker/cypht.env
+  #   volumes:
+  #     - email_client_db:/var/lib/postgresql/data
+
+  # email_client:
+  #   extends:
+  #     file: common.yaml
+  #     service: email_client
+  #   depends_on:
+  #     - email_client_db
+  #   volumes:
+  #     - cypht_attachments:/var/lib/hm3/attachments
+  #   networks:
+  #     default:
+  #     inverseproxy_shared:
+  #   restart: unless-stopped
+  #   env_file:
+  #     - .docker/cypht.env
+  #   labels:
+  #     traefik.enable: "true"
+  # Traefik routers for mail.manmanufacturing.com (configure when enabling prod webmail)
+
 networks:
   default:
     driver_opts:
@@ -241,6 +269,8 @@ volumes:
   backup_cache:
   filestore:
   db:
+  # cypht_attachments:
+  # email_client_db:
   mailconfig:
   maildata:
   maillogs:
