@@ -96,35 +96,59 @@ services:
     ports:
       - "127.0.0.1:${PORT_PREFIX:-19}025:8025"
     environment:
-      MP_SMTP_RELAY_HOST: &mailserver mailserver
+      MP_SMTP_RELAY_HOST: &stalwart stalwart
 
-  mailserver:
+  mailgate_hook:
     extends:
       file: common.yaml
-      service: mailserver_fake
+      service: mailgate_hook
     networks:
       default:
+        aliases:
+          - mailgate-hook
+          - mailgate_hook
     environment:
       ODOO_DB: *dbname
-      ODOO_USER_ID: 2
-      MAILGATE_SMTP_PORT: "13525"
-      MAILBOX_DOMAIN: *mailserver
-      MAILBOX_USER: admin
+      ODOO_USER_ID: "2"
       ADMIN_PASSWORD: admin
-      SMTP_SERVICE_NAME: smtp
 
-  roundcube:
+  stalwart:
     extends:
       file: common.yaml
-      service: email_client_fake
+      service: stalwart_fake
+    networks:
+      default:
+      public:
+    ports:
+      - "127.0.0.1:${PORT_PREFIX:-19}825:8080"
+    environment:
+      STALWART_RECOVERY_ADMIN: "admin:admin"
+      ADMIN_PASSWORD: develmail
+      ODOO_RECEIVING_DOMAINS: manmanufacturing.com
+
+  webmail:
+    extends:
+      file: common.yaml
+      service: bulwark_webmail
+    networks: *public
+    environment:
+      # Same host:port as webmail_proxy so the browser JMAP fetch is same-origin (CSP).
+      JMAP_SERVER_URL: "http://localhost:${PORT_PREFIX:-19}080"
+      SESSION_SECRET: "${BULWARK_SESSION_SECRET:-devel-bulwark-session-secret-change-me}"
+      STALWART_FEATURES: "true"
+    depends_on:
+      - stalwart
+
+  webmail_proxy:
+    extends:
+      file: common.yaml
+      service: webmail_jmap_proxy
     networks: *public
     ports:
       - "127.0.0.1:${PORT_PREFIX:-19}080:80"
-    environment:
-      ROUNDCUBEMAIL_USERNAME_DOMAIN: *mailserver
-      ROUNDCUBEMAIL_DEFAULT_HOST: *mailserver
-      ROUNDCUBEMAIL_SMTP_SERVER: *mailserver
-      ROUNDCUBEMAIL_SMTP_PORT: 13525
+    depends_on:
+      - webmail
+      - stalwart
 
   wdb:
     image: docker.io/kozea/wdb
@@ -184,8 +208,10 @@ networks:
 volumes:
   filestore:
   db:
-  roundcube:
-  roundcube_db:
+  stalwart_etc:
+  stalwart_data:
+  bulwark_admin:
+  bulwark_settings:
   mailgate:
     driver: local
     driver_opts:

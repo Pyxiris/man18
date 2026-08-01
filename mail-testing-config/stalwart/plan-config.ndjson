@@ -1,0 +1,6 @@
+{"@type":"create","object":"Domain","value":{"odoo-inbound":{"name":"manmanufacturing.com","description":"Odoo mailgate routing (no mailboxes)"}}}
+{"@type":"create","object":"NetworkListener","value":{"smtp-inbound":{"name":"smtp-inbound","protocol":"smtp","bind":{"[::]:25":true},"tlsImplicit":false,"useTls":false,"socketReuseAddress":true,"socketNoDelay":true}}}
+{"@type":"create","object":"NetworkListener","value":{"submission":{"name":"submission","protocol":"smtp","bind":{"[::]:587":true},"tlsImplicit":false,"useTls":false,"socketReuseAddress":true,"socketNoDelay":true}}}
+{"@type":"create","object":"NetworkListener","value":{"http-jmap":{"name":"http-jmap","protocol":"http","bind":{"[::]:8080":true},"tlsImplicit":false,"useTls":false,"socketReuseAddress":true,"socketNoDelay":true}}}
+{"@type":"update","object":"Http","value":{"usePermissiveCors":true}}
+{"@type":"create","object":"SieveSystemScript","value":{"devel-routing":{"name":"devel-routing","description":"Route non-Odoo mail to the test inbox","isActive":true,"contents":"require [\"envelope\", \"redirect\"];\n\nif envelope :domain \"to\" \"manmanufacturing.com\" {\n  keep;\n} else {\n  redirect \"admin@mail.test\";\n}\n"}}}

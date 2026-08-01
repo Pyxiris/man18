@@ -1,0 +1,1 @@
+{"@type":"update","object":"Bootstrap","value":{"serverHostname":"mail.mail.test","defaultDomain":"mail.test","generateDkimKeys":false,"requestTlsCertificate":false,"dataStore":{"@type":"RocksDb","path":"/var/lib/stalwart/data","blobSize":16834,"bufferSize":134217728}}}

@@ -37,51 +37,58 @@ services:
 
   smtpfake:
     image: docker.io/axllent/mailpit
+    hostname: mailpit.mail.test
     environment:
       MP_SMTP_RELAY_ALL: "true"
       MP_SMTP_RELAY_ALLOW_INSECURE: "true"
       MP_SMTP_RELAY_PRESERVE_MESSAGE_IDS: "true"
 
-  mailserver_fake:
-    image: ghcr.io/docker-mailserver/docker-mailserver:latest
-    hostname: mailserver.manmanufacturing.com
+  stalwart_fake:
+    build:
+      context: ./mail-testing-config/stalwart
+    hostname: mail.mail.test
     environment:
-      PERMIT_DOCKER: connected-networks
-      POSTFIX_INET_PROTOCOLS: ipv4
-      ENABLE_AMAVIS: 0
-      ENABLE_OPENDKIM: 0
-      ENABLE_OPENDMARC: 0
-      ENABLE_POLICYD_SPF: 0
-      ENABLE_SRS: 0
-      ENABLE_QUOTAS: 0
-      MAILGATE_SMTP_PORT: "13525"
+      STALWART_RECOVERY_ADMIN: "admin:${STALWART_ADMIN_PASSWORD:-admin}"
+      ADMIN_PASSWORD: "${STALWART_MAILBOX_PASSWORD:-develmail}"
       ODOO_RECEIVING_DOMAINS: manmanufacturing.com
-    entrypoint:
-      - /bin/bash
-      - -c
-      - |
-        set -euo pipefail
-        mkdir -p /tmp/docker-mailserver
-        echo "$${MAILBOX_USER}@$${MAILBOX_DOMAIN}|{PLAIN}$${ADMIN_PASSWORD}" \
-          > /tmp/docker-mailserver/postfix-accounts.cf
-        exec /usr/bin/dumb-init -- supervisord -c /etc/supervisor/supervisord.conf
     volumes:
-      - ./mail-testing-config/docker-mailserver/user-patches.sh:/tmp/docker-mailserver/user-patches.sh:ro
-      - mailgate:/tmp/mailgate:ro,z
-
-  email_client_fake:
-    image: roundcube/roundcubemail
-    environment:
-      ROUNDCUBEMAIL_DB_TYPE: sqlite
-      ROUNDCUBEMAIL_COMPOSER_PLUGINS: "texxasrulez/persistent_login"
-      ROUNDCUBEMAIL_PLUGINS: "show_additional_headers,persistent_login,autocreate_identity"
+      - stalwart_etc:/etc/stalwart
+      - stalwart_data:/var/lib/stalwart
     depends_on:
-      - mailserver
+      - mailgate_hook
+
+  mailgate_hook:
+    build:
+      context: ./mail-testing-config/mailgate-hook
+    environment:
+      ODOO_RECEIVING_DOMAINS: manmanufacturing.com
+      ODOO_HOST: odoo
+      ODOO_PORT: "8069"
     volumes:
-      - ./mail-testing-config/roundcube/config/roundcube_user_settings.inc.php:/var/roundcube/config/config.inc.php:ro
-      - ./mail-testing-config/roundcube/plugins/autocreate_identity:/var/www/html/plugins/autocreate_identity
-      - roundcube:/var/www/html:rw
-      - roundcube_db:/var/roundcube/db:rw
+      - mailgate:/mailgate:ro,z
+    networks:
+      default:
+        aliases:
+          - mailgate-hook
+
+  webmail_jmap_proxy:
+    image: docker.io/caddy:2-alpine
+    volumes:
+      - ./mail-testing-config/webmail-proxy/Caddyfile:/etc/caddy/Caddyfile:ro
+
+  bulwark_webmail:
+    image: ghcr.io/bulwarkmail/webmail:latest
+    environment:
+      HOSTNAME: "0.0.0.0"
+      PORT: "3000"
+      STALWART_FEATURES: "true"
+      SETTINGS_SYNC_ENABLED: "true"
+      LOG_FORMAT: text
+      LOG_LEVEL: info
+    volumes:
+      - bulwark_admin:/app/data/admin
+      - ./mail-testing-config/bulwark/policy.json:/app/data/admin/policy.json:ro
+      - bulwark_settings:/app/data/settings
 
   smtpreal:
     image: ghcr.io/docker-mailserver/docker-mailserver:latest
@@ -131,4 +138,8 @@ services:
       - filestore:/mnt/backup/src/odoo
 
 volumes:
+  stalwart_etc:
+  stalwart_data:
+  bulwark_admin:
+  bulwark_settings:
   mailgate:

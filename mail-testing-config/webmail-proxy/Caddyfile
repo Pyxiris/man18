@@ -1,0 +1,12 @@
+# Same-origin JMAP for Bulwark (production CSP: connect-src 'self' https:).
+# Browser hits http://127.0.0.1:19080; Stalwart HTTP listener paths are proxied here.
+
+:80 {
+	@stalwart_http path /.well-known/* /jmap*
+	handle @stalwart_http {
+		reverse_proxy stalwart:8080
+	}
+	handle {
+		reverse_proxy webmail:3000
+	}
+}
