@@ -58,6 +58,9 @@
 #   - mail_partner_opt_out
 #   - mail_restrict_follower_selection
 
+./social:
+  - mail_plugin_inject_raw
+
 ./server-brand:
   - disable_odoo_online
   - website_debranding
