@@ -41,7 +41,7 @@ paths_without_crawlers:
 postgres_dbname: prod
 postgres_exposed: false
 postgres_username: odoo
-postgres_version: "17"
+postgres_version: "18"
 project_author: Liam Noonan
 project_license: LGPL-3.0-or-later
 project_name: man18
