@@ -1,5 +1,5 @@
 # Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
-_commit: v9.6.1
+_commit: v10.0.5
 _src_path: gh:Tecnativa/doodba-copier-template
 backup_deletion: false
 backup_dst: boto3+s3://man18-backup
@@ -54,8 +54,6 @@ smtp_relay_user: manmanufacturing.com
 smtp_relay_version: latest
 traefik_version: 3
 use_refurb: true
-whitelist_docker_project_devel: man18
-whitelist_docker_project_test: demo-man18-19
 whitelisted_hosts_devel:
   - cdnjs.cloudflare.com
   - fonts.googleapis.com
