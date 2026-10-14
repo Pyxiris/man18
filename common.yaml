@@ -39,11 +39,11 @@ services:
     environment:
       POSTGRES_DB: *dbname
       POSTGRES_USER: *dbuser
-      PGDATA: "/var/lib/postgresql/data"
+      PGDATA: "/var/lib/postgresql"
       CONF_EXTRA: |
         work_mem = 512MB
     volumes:
-      - db:/var/lib/postgresql/data
+      - db:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER"]
       interval: 30s

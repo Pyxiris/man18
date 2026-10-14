@@ -20,7 +20,7 @@
   - mrp
   - fleet
   - repair
-  - maintenanance
+  - maintenance
   # HR
   - hr
   - hr_expense
@@ -29,19 +29,18 @@
   - hr_skills
   # Technical
   - website_cf_turnstile
-
-./web:
-  - web_responsive
-  - web_refresher
-  # - web_theme_classic
-  # - web_copy_confirm
-  - web_favicon
-  # - web_pivot_computed_measure
-  - web_remember_tree_column_width
-  # - web_timeline
-  # - web_tree_many2one_clickable
-  # - web_widget_domain_editor_dialog
-  - web_dark_mode
+# ./web:
+#   - web_responsive
+#   - web_refresher
+#   - web_theme_classic
+#   - web_copy_confirm
+#   - web_favicon
+#   - web_pivot_computed_measure
+#   - web_remember_tree_column_width
+#   - web_timeline
+#   - web_tree_many2one_clickable
+#   - web_widget_domain_editor_dialog
+#   - web_dark_mode
 
 # ./spreadsheet:
 #   - spreadsheet_oca
@@ -58,13 +57,13 @@
 #   - mail_partner_opt_out
 #   - mail_restrict_follower_selection
 
-./server-brand:
-  - disable_odoo_online
-  - website_debranding
-  - mail_debranding
-  - portal_debranding
-  - remove_odoo_enterprise
-  - sale_portal_debranding
+# ./server-brand:
+#   - disable_odoo_online
+#   - website_debranding
+#   - mail_debranding
+#   - portal_debranding
+#   - remove_odoo_enterprise
+#   - sale_portal_debranding
 
-./crm:
-  - crm_project_task
+# ./crm:
+#   - crm_project_task

@@ -14,12 +14,12 @@
   merges:
     - ocb $ODOO_VERSION
     - odoo $ODOO_VERSION
-    - px-odoo $ODOO_VERSION
-    - px-odoo 19.0-mail_disable_relay_notification
-    - px-odoo 19.0-web-bring-back-print-button
-    - px-odoo 19.0-always_handle_notifications_in_odoo
-    - px-odoo 19.0-backport-checkbox-improvements-autopatch
-    - px-odoo 19.0-search-both-directions-autopatch # https://github.com/odoo/odoo/pull/276138 merged in odoo master (20.0). Patch for 19.0 only.
+    # - px-odoo $ODOO_VERSION
+    # - px-odoo 19.0-mail_disable_relay_notification
+    # - px-odoo 19.0-web-bring-back-print-button
+    # - px-odoo 19.0-always_handle_notifications_in_odoo
+    # - px-odoo 19.0-backport-checkbox-improvements-autopatch
+    # - px-odoo 19.0-search-both-directions-autopatch # https://github.com/odoo/odoo/pull/276138 merged in odoo master (20.0). Patch for 19.0 only.
 
 ./web:
   defaults:
@@ -30,6 +30,7 @@
   target: agg
   merges:
     - oca-web $ODOO_VERSION
+    - px-web 20.0-mig-web_dark_mode
 
 ./server-brand:
   defaults:
@@ -39,7 +40,7 @@
   target: agg
   merges:
     - oca-server-brand $ODOO_VERSION
-    - oca-server-brand refs/pull/111/head # [19.0][ADD] web_debranding: add
+    # - oca-server-brand refs/pull/111/head # [19.0][ADD] web_debranding: add
 
 ./crm:
   defaults:
