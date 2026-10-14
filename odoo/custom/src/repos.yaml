@@ -30,7 +30,6 @@
   target: agg
   merges:
     - oca-web $ODOO_VERSION
-    - px-web 19.0-mig-web_dark_mode
 
 ./server-brand:
   defaults:
