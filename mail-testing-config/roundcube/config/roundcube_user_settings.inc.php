@@ -11,3 +11,6 @@ $config['reply_mode'] = 1;
 // https://github.com/roundcube/roundcubemail-docker/blob/9fd84b3e4f7943c7b2046d0a443a39d1a702edf2/fpm/docker-entrypoint.sh#L177-#L188
 $config['smtp_user'] = '';
 $config['smtp_pass'] = '';
+
+// Session lifetime of 30 days (in minutes).
+$config['session_lifetime'] = 43200;
