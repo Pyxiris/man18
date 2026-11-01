@@ -99,7 +99,6 @@ services:
       - ./mail-testing-config/roundcube/plugins/autocreate_identity:/var/www/html/plugins/autocreate_identity
       - ./mail-testing-config/roundcube/plugins/devel_autologon:/var/www/html/plugins/devel_autologon
       - roundcube:/var/www/html:rw
-      - roundcube_db:/var/roundcube/db:rw
 
   smtpreal:
     image: ghcr.io/docker-mailserver/docker-mailserver:latest
