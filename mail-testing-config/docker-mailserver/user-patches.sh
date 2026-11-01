@@ -84,7 +84,7 @@ try:
         "-d", DB,
         "-u", USER,
         "-p", PASSWORD,
-        "--host", "odoo",
+        "--host", "gatekeeper",
         "--port", "8069",
     ]
     return_code = subprocess.run(cmd, stdin=sys.stdin.buffer).returncode
